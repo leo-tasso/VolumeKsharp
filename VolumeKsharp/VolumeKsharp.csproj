@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NAudio" Version="2.1.0" />
+      <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+      <PackageReference Include="System.Speech" Version="7.0.0" />
+      <PackageReference Include="System.Windows.Extensions" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="System.Speech">
+        <HintPath>..\..\..\..\..\Windows\Microsoft.NET\Framework\v4.0.30319\WPF\System.Speech.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>
