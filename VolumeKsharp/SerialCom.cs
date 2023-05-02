@@ -7,67 +7,58 @@ namespace VolumeKsharp;
 
 public class SerialCom
 {
-    private static readonly Queue<IApperanceCommand> ApperanceCommandsQueue = new Queue<IApperanceCommand>();
+    private static readonly Queue<IAppearanceCommand> AppearanceCommandsQueue = new Queue<IAppearanceCommand>();
     private static readonly object CommandQueueLock = new object();
-    
-    private const float StepSize = 2;
-    public static bool Continue { get; set; }
+
+    private static bool Continue { get; set; }
     private static readonly SerialPort SerialPort = new SerialPort();
     private readonly Controller _controller;
-    
+    private readonly Thread _readThread;
+    private readonly Thread _writeThread;
+
     public SerialCom(Controller controller)
     {
         this._controller = controller;
-    }
-
-    public static void Main()
-    {
-        var readThread = new Thread(Read);
-        var writeThread = new Thread(Write);
+        _readThread = new Thread(this.Read);
+        _writeThread = new Thread(Write);
         SerialPort.PortName = "com3";
         SerialPort.ReadTimeout = 500;
         SerialPort.WriteTimeout = 500;
         SerialPort.DtrEnable = true;
         SerialPort.Open();
         Continue = true;
-        readThread.Start();
-        writeThread.Start();
-        readThread.Join();
-        writeThread.Join();
-        SerialPort.Close();
+        _readThread.Start();
+        _writeThread.Start();
     }
 
-    private static void Write(){
+    private static void Write()
+    {
         while (Continue)
         {
             lock (CommandQueueLock)
             {
-                while (ApperanceCommandsQueue.Count == 0)
+                while (AppearanceCommandsQueue.Count == 0)
                 {
                     Monitor.Wait(CommandQueueLock);
                 }
-                string? message = ApperanceCommandsQueue.Dequeue().Message;
+
+                string? message = AppearanceCommandsQueue.Dequeue().Message;
                 if (message != null) SerialPort.WriteLine(message);
             }
-
-            
         }
     }
-    
 
-    public static void AddCommand(IApperanceCommand command)
+    public void AddCommand(IAppearanceCommand command)
     {
         lock (CommandQueueLock)
         {
-            ApperanceCommandsQueue.Enqueue(command);
+            AppearanceCommandsQueue.Enqueue(command);
             Monitor.Pulse(CommandQueueLock);
         }
     }
 
-    private static void Read()
+    private void Read()
     {
-        Volume volume = new Volume();
-
         while (Continue)
         {
             try
@@ -76,18 +67,24 @@ public class SerialCom
                 Console.WriteLine(message);
                 if (message.Equals("-\r"))
                 {
-                    volume.SetVolume(volume.GetVolume() - StepSize);
+                    _controller.AddInputCommand(InputCommands.Minus);
                 }
                 else if (message.Equals("+\r"))
                 {
-                    volume.SetVolume(volume.GetVolume() + StepSize);
+                    _controller.AddInputCommand(InputCommands.Plus);
                 }
-                AddCommand(new PercentageApperanceCommand(Convert.ToInt32(volume.GetVolume())));
             }
             catch (TimeoutException)
             {
             }
         }
     }
-    
+
+    public bool Stop()
+    {
+        _readThread.Join();
+        _writeThread.Join();
+        SerialPort.Close();
+        return true;
+    }
 }
