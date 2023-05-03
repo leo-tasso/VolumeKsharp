@@ -5,6 +5,8 @@
 
 namespace VolumeKsharp;
 
+using System;
+
 /// <summary>
 /// Launcher class that contains the entry point.
 /// </summary>
@@ -12,9 +14,13 @@ public static class Launcher
 {/// <summary>
  /// The entry point.
  /// </summary>
-    public static void Main()
-    {
-        // ReSharper disable once ObjectCreationAsStatement
-        new Controller();
-    }
+ [STAThread]
+ public static void Main()
+ {
+     TrayIconMenu program = new TrayIconMenu();
+     program.ContextMenuThread();
+
+     // ReSharper disable once ObjectCreationAsStatement
+     new Controller();
+ }
 }
