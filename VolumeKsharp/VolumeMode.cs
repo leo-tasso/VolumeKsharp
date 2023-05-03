@@ -1,36 +1,48 @@
-using System;
-using System.Diagnostics;
+// <copyright file="VolumeMode.cs" company="LeonardoTassinari">
+// Copyright (c) LeonardoTassinari. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
 
 namespace VolumeKsharp;
 
+using System;
+using System.Diagnostics;
+
+/// <summary/> mode to show volume status on the ring.
 public class VolumeMode : IMode
 {
-    private bool _on;
-    private readonly Stopwatch _sw = Stopwatch.StartNew();
-    private long _swo;
-    private float _oldVolume;
     private const float StepSize = 2;
     private const double Tolerance = 1;
-    private readonly Volume _volume = new Volume();
-    private readonly SerialCom _serialcom;
+    private readonly Stopwatch sw = Stopwatch.StartNew();
+    private readonly Volume volume = new Volume();
+    private readonly SerialCom serialcom;
+    private bool on;
+    private long swo;
+    private float oldVolume;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="VolumeMode"/> class.
+    /// </summary>
+    /// <param name="serialcom"> the serial communicator that will be used.</param>
     public VolumeMode(SerialCom serialcom)
     {
-        this._serialcom = serialcom;
+        this.serialcom = serialcom;
     }
 
+    /// <inheritdoc/>
     public bool IncomingCommands(InputCommands command)
     {
-        _oldVolume = Convert.ToInt32(_volume.GetVolume());
+        this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
         switch (command)
         {
             case InputCommands.Minus:
             {
-                _volume.SetVolume(_volume.GetVolume() - StepSize);
+                this.volume.SetVolume(this.volume.GetVolume() - StepSize);
                 break;
             }
+
             case InputCommands.Plus:
-                _volume.SetVolume(_volume.GetVolume() + StepSize);
+                this.volume.SetVolume(this.volume.GetVolume() + StepSize);
                 break;
             case InputCommands.Press:
                 return false;
@@ -43,20 +55,21 @@ public class VolumeMode : IMode
         return true;
     }
 
+    /// <inheritdoc/>
     public void Compute()
     {
-        if (Math.Abs(_oldVolume - Convert.ToInt32(_volume.GetVolume())) > Tolerance)
+        if (Math.Abs(this.oldVolume - Convert.ToInt32(this.volume.GetVolume())) > Tolerance)
         {
-            _swo = _sw.ElapsedMilliseconds;
-            _serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(_volume.GetVolume())));
-            _oldVolume = Convert.ToInt32(_volume.GetVolume());
-            _on = true;
+            this.swo = this.sw.ElapsedMilliseconds;
+            this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volume.GetVolume())));
+            this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
+            this.on = true;
         }
 
-        if (_sw.ElapsedMilliseconds - _swo > 500 && _on)
+        if (this.sw.ElapsedMilliseconds - this.swo > 500 && this.on)
         {
-            _serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(0)));
-            _on = false;
+            this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(0)));
+            this.on = false;
         }
     }
 }

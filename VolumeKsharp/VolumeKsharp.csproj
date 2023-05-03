@@ -6,11 +6,17 @@
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
-
+        <Company>LeonardoTassinari</Company>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
+      <AdditionalFiles Include="stylecop.json" />
       <PackageReference Include="NAudio" Version="2.1.0" />
+      <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="System.IO.Ports" Version="7.0.0" />
       <PackageReference Include="System.Speech" Version="7.0.0" />
       <PackageReference Include="System.Windows.Extensions" Version="7.0.0" />

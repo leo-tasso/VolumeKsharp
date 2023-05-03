@@ -1,34 +1,72 @@
-﻿using System;
+﻿// <copyright file="SerialCom.cs" company="LeonardoTassinari">
+// Copyright (c) LeonardoTassinari. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// </copyright>
+
+namespace VolumeKsharp;
+
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Threading;
 
-namespace VolumeKsharp;
-
+/// <summary>
+/// Class to dialog serially with the knob.
+/// </summary>
 public class SerialCom
 {
     private static readonly Queue<IAppearanceCommand> AppearanceCommandsQueue = new Queue<IAppearanceCommand>();
     private static readonly object CommandQueueLock = new object();
 
-    private static bool Continue { get; set; }
     private static readonly SerialPort SerialPort = new SerialPort();
-    private readonly Controller _controller;
-    private readonly Thread _readThread;
-    private readonly Thread _writeThread;
+    private readonly Controller controller;
+    private readonly Thread readThread;
+    private readonly Thread writeThread;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SerialCom"/> class.
+    /// </summary>
+    /// <param name="controller">The reference controller.</param>
     public SerialCom(Controller controller)
     {
-        this._controller = controller;
-        _readThread = new Thread(this.Read);
-        _writeThread = new Thread(Write);
+        this.controller = controller;
+        this.readThread = new Thread(this.Read);
+        this.writeThread = new Thread(Write);
         SerialPort.PortName = "com3";
         SerialPort.ReadTimeout = 500;
         SerialPort.WriteTimeout = 500;
         SerialPort.DtrEnable = true;
         SerialPort.Open();
         Continue = true;
-        _readThread.Start();
-        _writeThread.Start();
+        this.readThread.Start();
+        this.writeThread.Start();
+    }
+
+    private static bool Continue { get; set; }
+
+    /// <summary>
+    /// Method to add a command to send to the knob.
+    /// </summary>
+    /// <param name="command">The command to send to the knob.</param>
+    public void AddCommand(IAppearanceCommand command)
+    {
+        lock (CommandQueueLock)
+        {
+            AppearanceCommandsQueue.Enqueue(command);
+            Monitor.Pulse(CommandQueueLock);
+        }
+    }
+
+    /// <summary>
+    /// Method to stop the serial communication.
+    /// </summary>
+    /// <returns>If it stopped correctly.</returns>
+    public bool Stop()
+    {
+        this.readThread.Join();
+        this.writeThread.Join();
+        SerialPort.Close();
+        return true;
     }
 
     private static void Write()
@@ -43,17 +81,11 @@ public class SerialCom
                 }
 
                 string? message = AppearanceCommandsQueue.Dequeue().Message;
-                if (message != null) SerialPort.WriteLine(message);
+                if (message != null)
+                {
+                    SerialPort.WriteLine(message);
+                }
             }
-        }
-    }
-
-    public void AddCommand(IAppearanceCommand command)
-    {
-        lock (CommandQueueLock)
-        {
-            AppearanceCommandsQueue.Enqueue(command);
-            Monitor.Pulse(CommandQueueLock);
         }
     }
 
@@ -67,24 +99,16 @@ public class SerialCom
                 Console.WriteLine(message);
                 if (message.Equals("-\r"))
                 {
-                    _controller.AddInputCommand(InputCommands.Minus);
+                    this.controller.AddInputCommand(InputCommands.Minus);
                 }
                 else if (message.Equals("+\r"))
                 {
-                    _controller.AddInputCommand(InputCommands.Plus);
+                    this.controller.AddInputCommand(InputCommands.Plus);
                 }
             }
             catch (TimeoutException)
             {
             }
         }
-    }
-
-    public bool Stop()
-    {
-        _readThread.Join();
-        _writeThread.Join();
-        SerialPort.Close();
-        return true;
     }
 }
