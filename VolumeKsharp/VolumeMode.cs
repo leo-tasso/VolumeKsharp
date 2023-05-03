@@ -32,6 +32,7 @@ public class VolumeMode : IMode
     /// <inheritdoc/>
     public bool IncomingCommands(InputCommands command)
     {
+        this.swo = this.sw.ElapsedMilliseconds;
         this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
         switch (command)
         {
@@ -52,6 +53,8 @@ public class VolumeMode : IMode
                 throw new ArgumentOutOfRangeException();
         }
 
+        this.Show();
+
         return true;
     }
 
@@ -60,10 +63,7 @@ public class VolumeMode : IMode
     {
         if (Math.Abs(this.oldVolume - Convert.ToInt32(this.volume.GetVolume())) > Tolerance)
         {
-            this.swo = this.sw.ElapsedMilliseconds;
-            this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volume.GetVolume())));
-            this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
-            this.on = true;
+            this.Show();
         }
 
         if (this.sw.ElapsedMilliseconds - this.swo > 500 && this.on)
@@ -71,5 +71,13 @@ public class VolumeMode : IMode
             this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(0)));
             this.on = false;
         }
+    }
+
+    private void Show()
+    {
+        this.swo = this.sw.ElapsedMilliseconds;
+        this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volume.GetVolume())));
+        this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
+        this.on = true;
     }
 }
