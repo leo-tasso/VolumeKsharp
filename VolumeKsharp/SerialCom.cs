@@ -38,9 +38,31 @@ public class SerialCom
         SerialPort.DtrEnable = true;
         SerialPort.Open();
         Continue = true;
+    }
+
+    public void Start()
+    {
         this.readThread.Start();
         this.writeThread.Start();
     }
+
+/// <summary>
+/// Method to get currently connected serial ports.
+/// </summary>
+/// <returns>Array of string of the names of the connected ports.</returns>
+    public string[] GetPorts()
+    {
+        return SerialPort.GetPortNames();
+    }
+
+/// <summary>
+/// Method to set the port to transmit to.
+/// </summary>
+/// <param name="portName">The string name of the port to transmit to.</param>
+    public void SetPort(string portName)
+{
+    SerialPort.PortName = portName;
+}
 
     private static bool Continue { get; set; }
 
