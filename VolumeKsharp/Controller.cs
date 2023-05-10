@@ -22,6 +22,7 @@ public class Controller
     {
         this.Continue = true;
         var serialcom = new SerialCom(this);
+        serialcom.Start();
         this.Mode = new VolumeMode(serialcom);
         while (this.Continue)
         {

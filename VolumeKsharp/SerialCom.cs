@@ -40,6 +40,11 @@ public class SerialCom
         Continue = true;
     }
 
+    private static bool Continue { get; set; }
+
+/// <summary>
+/// Method to start the serial communications.
+/// </summary>
     public void Start()
     {
         this.readThread.Start();
@@ -63,8 +68,6 @@ public class SerialCom
 {
     SerialPort.PortName = portName;
 }
-
-    private static bool Continue { get; set; }
 
     /// <summary>
     /// Method to add a command to send to the knob.
