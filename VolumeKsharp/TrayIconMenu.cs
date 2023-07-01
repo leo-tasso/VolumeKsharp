@@ -36,7 +36,7 @@ namespace VolumeKsharp
                 this.contextMenu = new ContextMenuStrip();
                 this.notifyIcon.ContextMenuStrip = this.contextMenu;
                 this.notifyIcon.Icon = new System.Drawing.Icon("LayerIcon.ico");
-                this.notifyIcon.Text = "TrayIcon Example";
+                this.notifyIcon.Text = "Volumek";
                 this.notifyIcon.Visible = true;
 
                 // Create the COM port selection dropdown
@@ -102,6 +102,7 @@ namespace VolumeKsharp
 
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
+            this.Controller!.Serialcom.Stop();
             this.notifyIcon!.Visible = false;
             Application.Exit();
         }

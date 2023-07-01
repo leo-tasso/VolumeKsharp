@@ -11,11 +11,13 @@ using System.Diagnostics;
 /// <summary/> mode to show volume status on the ring.
 public class VolumeMode : IMode
 {
+    private const double ChangeRate = 1;
     private const float StepSize = 2;
     private const double Tolerance = 1;
+    private readonly SerialCom serialcom;
     private readonly Stopwatch sw = Stopwatch.StartNew();
     private readonly Volume volume = new Volume();
-    private readonly SerialCom serialcom;
+    private double volumeShown;
     private bool on;
     private long swo;
     private float oldVolume;
@@ -61,7 +63,7 @@ public class VolumeMode : IMode
     /// <inheritdoc/>
     public void Compute()
     {
-        if (Math.Abs(this.oldVolume - Convert.ToInt32(this.volume.GetVolume())) > Tolerance)
+        if (Math.Abs(this.oldVolume - Convert.ToInt32(this.volumeShown)) > Tolerance)
         {
             this.Show();
         }
@@ -76,7 +78,16 @@ public class VolumeMode : IMode
     private void Show()
     {
         this.swo = this.sw.ElapsedMilliseconds;
-        this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volume.GetVolume())));
+        if (this.volumeShown < this.volume.GetVolume())
+        {
+            this.volumeShown += ChangeRate;
+        }
+        else if (this.volumeShown > this.volume.GetVolume())
+        {
+            this.volumeShown -= ChangeRate;
+        }
+
+        this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volumeShown)));
         this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
         this.on = true;
     }
