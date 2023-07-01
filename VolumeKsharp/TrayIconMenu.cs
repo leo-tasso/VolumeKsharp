@@ -15,40 +15,58 @@ namespace VolumeKsharp
     public class TrayIconMenu
     {
         private NotifyIcon? notifyIcon;
+        private ContextMenuStrip contextMenu = null!;
+        private ToolStripComboBox comPortComboBox = null!;
+        private ToolStripMenuItem connectMenuItem = null!;
+        private ToolStripMenuItem disconnectMenuItem = null!;
+        private ToolStripMenuItem exitMenuItem = null!;
+
+        private Controller? Controller { get; set; }
 
         /// <summary>
         /// Method to start the thread.
         /// </summary>
-        public void ContextMenuThread()
+        /// <param name="masterController">The Main controller.</param>
+        public void ContextMenuThread(Controller masterController)
         {
             // Create a new thread to host the context menu strip and message loop
             Thread contextMenuThread = new Thread(() =>
             {
-                // Create a new NotifyIcon instance
+                this.Controller = masterController;
                 this.notifyIcon = new NotifyIcon();
-
-                // Create a new ContextMenuStrip instance
-                ContextMenuStrip contextMenuStrip = new ContextMenuStrip();
-
-                // Add items to the context menu strip
-                ToolStripMenuItem item1 = new ToolStripMenuItem("Item 1");
-                ToolStripMenuItem item2 = new ToolStripMenuItem("Item 2");
-                contextMenuStrip.Items.Add(item1);
-                contextMenuStrip.Items.Add(item2);
-
-                // Hook up event handlers for the menu items
-                item1.Click += this.OnItemClick!;
-                item2.Click += this.OnItemClick!;
-
-                // Set the NotifyIcon's context menu strip
-                this.notifyIcon.ContextMenuStrip = contextMenuStrip;
-
-                // Set the NotifyIcon's icon and text
+                this.contextMenu = new ContextMenuStrip();
+                this.notifyIcon.ContextMenuStrip = this.contextMenu;
                 this.notifyIcon.Icon = new System.Drawing.Icon("LayerIcon.ico");
                 this.notifyIcon.Text = "TrayIcon Example";
-
-                // Display the NotifyIcon
                 this.notifyIcon.Visible = true;
+
+                // Create the COM port selection dropdown
+                this.comPortComboBox = new ToolStripComboBox("Select COM Port");
+                this.contextMenu.Items.Add(this.comPortComboBox);
+
+                // Populate the COM port dropdown with available ports
+                string[] availablePorts = this.Controller.Serialcom.GetPorts();
+
+                // ReSharper disable once CoVariantArrayConversion
+                this.comPortComboBox.Items.AddRange(availablePorts);
+
+                this.comPortComboBox.SelectedItem = this.Controller.Serialcom.Port.ToUpper();
+
+                // Create the menu items
+                this.connectMenuItem = new ToolStripMenuItem("Connect");
+                this.disconnectMenuItem = new ToolStripMenuItem("Disconnect");
+                this.exitMenuItem = new ToolStripMenuItem("Exit");
+
+                // Add the menu items to the context menu
+                this.contextMenu.Items.Add(this.connectMenuItem);
+                this.contextMenu.Items.Add(this.disconnectMenuItem);
+                this.contextMenu.Items.Add(this.exitMenuItem);
+
+                // Hook up event handlers
+                this.comPortComboBox.SelectedIndexChanged += this.ComPortComboBox_SelectedIndexChanged!;
+                this.connectMenuItem.Click += this.ConnectMenuItem_Click!;
+                this.disconnectMenuItem.Click += this.DisconnectMenuItem_Click!;
+                this.exitMenuItem.Click += this.ExitMenuItem_Click!;
 
                 // Start the message loop
                 Application.Run();
@@ -61,12 +79,29 @@ namespace VolumeKsharp
             contextMenuThread.Start();
         }
 
-        private void OnItemClick(object sender, EventArgs e)
+        private void ComPortComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Handle menu item click events here
-            ToolStripMenuItem clickedItem = (ToolStripMenuItem)sender;
-            string itemName = clickedItem.Text;
-            MessageBox.Show($"You clicked {itemName}!");
+            // Get the selected COM port from the dropdown
+            string selectedPort = this.comPortComboBox.SelectedItem.ToString() ?? string.Empty;
+            var controller = this.Controller;
+            if (controller != null)
+            {
+                controller.Serialcom.Port = selectedPort;
+            }
+        }
+
+        private void ConnectMenuItem_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void DisconnectMenuItem_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void ExitMenuItem_Click(object sender, EventArgs e)
+        {
+            this.notifyIcon!.Visible = false;
+            Application.Exit();
         }
     }
 }

@@ -13,7 +13,7 @@ using System.Threading;
 /// </summary>
 public class Controller
 {
-    private static readonly Queue<InputCommands> InputCommandsQueue = new Queue<InputCommands>();
+    private static readonly Queue<InputCommands> InputCommandsQueue = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Controller"/> class.
@@ -21,9 +21,32 @@ public class Controller
     public Controller()
     {
         this.Continue = true;
-        var serialcom = new SerialCom(this);
-        serialcom.Start();
-        this.Mode = new VolumeMode(serialcom);
+        this.Serialcom = new SerialCom(this);
+        this.Serialcom.Start();
+        new Thread(this.Update).Start();
+    }
+
+    /// <summary>
+    /// Gets the serialCommunication class of this Controller.
+    /// </summary>
+    public SerialCom Serialcom { get; }
+
+    private bool Continue { get; set; }
+
+    private IMode? Mode { get; set; }
+
+    /// <summary>
+    /// Method used externally to add commands.
+    /// </summary>
+    /// <param name="command"> The command to be added.</param>
+    public void AddInputCommand(InputCommands command)
+    {
+        InputCommandsQueue.Enqueue(command);
+    }
+
+    private void Update()
+    {
+        this.Mode = new VolumeMode(this.Serialcom);
         while (this.Continue)
         {
             if (InputCommandsQueue.Count > 0)
@@ -34,18 +57,5 @@ public class Controller
             this.Mode.Compute();
             Thread.Sleep(20);
         }
-    }
-
-    private bool Continue { get; set; }
-
-    private IMode Mode { get; set; }
-
-/// <summary>
-/// Method used externally to add commands.
-/// </summary>
-/// <param name="command"> The command to be added.</param>
-    public void AddInputCommand(InputCommands command)
-    {
-        InputCommandsQueue.Enqueue(command);
     }
 }

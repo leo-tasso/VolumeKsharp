@@ -29,10 +29,8 @@ public static class Launcher
      }
 
      TrayIconMenu program = new TrayIconMenu();
-     program.ContextMenuThread();
-
-     // ReSharper disable once ObjectCreationAsStatement
-     new Controller();
+     var controller = new Controller();
+     program.ContextMenuThread(controller);
  }
 
     [DllImport("kernel32.dll")]

@@ -32,12 +32,19 @@ public class SerialCom
         this.controller = controller;
         this.readThread = new Thread(this.Read);
         this.writeThread = new Thread(Write);
-        SerialPort.PortName = "com3";
+        SerialPort.PortName = "com7";
         SerialPort.ReadTimeout = 500;
         SerialPort.WriteTimeout = 500;
         SerialPort.DtrEnable = true;
-        SerialPort.Open();
-        Continue = true;
+    }
+
+    /// <summary>
+    /// Gets or sets selected Port.
+    /// </summary>
+    public string Port
+    {
+        get => SerialPort.PortName;
+        set => SerialPort.PortName = value;
     }
 
     private static bool Continue { get; set; }
@@ -47,8 +54,13 @@ public class SerialCom
 /// </summary>
     public void Start()
     {
-        this.readThread.Start();
-        this.writeThread.Start();
+        if (Continue == false)
+        {
+            Continue = true;
+            SerialPort.Open();
+            this.readThread.Start();
+            this.writeThread.Start();
+        }
     }
 
 /// <summary>
@@ -61,15 +73,6 @@ public class SerialCom
     }
 
 /// <summary>
-/// Method to set the port to transmit to.
-/// </summary>
-/// <param name="portName">The string name of the port to transmit to.</param>
-    public void SetPort(string portName)
-{
-    SerialPort.PortName = portName;
-}
-
-    /// <summary>
     /// Method to add a command to send to the knob.
     /// </summary>
     /// <param name="command">The command to send to the knob.</param>
@@ -88,9 +91,11 @@ public class SerialCom
     /// <returns>If it stopped correctly.</returns>
     public bool Stop()
     {
+        Continue = false;
         this.readThread.Join();
         this.writeThread.Join();
         SerialPort.Close();
+        SerialPort.Dispose();
         return true;
     }
 
