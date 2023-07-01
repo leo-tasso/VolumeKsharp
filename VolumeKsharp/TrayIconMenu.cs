@@ -18,7 +18,6 @@ namespace VolumeKsharp
         private ContextMenuStrip contextMenu = null!;
         private ToolStripComboBox comPortComboBox = null!;
         private ToolStripMenuItem connectMenuItem = null!;
-        private ToolStripMenuItem disconnectMenuItem = null!;
         private ToolStripMenuItem exitMenuItem = null!;
 
         private Controller? Controller { get; set; }
@@ -53,19 +52,16 @@ namespace VolumeKsharp
                 this.comPortComboBox.SelectedItem = this.Controller.Serialcom.Port.ToUpper();
 
                 // Create the menu items
-                this.connectMenuItem = new ToolStripMenuItem("Connect");
-                this.disconnectMenuItem = new ToolStripMenuItem("Disconnect");
+                this.connectMenuItem = new ToolStripMenuItem(this.Controller!.Serialcom.Running ? "Disconnect" : "Connect");
                 this.exitMenuItem = new ToolStripMenuItem("Exit");
 
                 // Add the menu items to the context menu
                 this.contextMenu.Items.Add(this.connectMenuItem);
-                this.contextMenu.Items.Add(this.disconnectMenuItem);
                 this.contextMenu.Items.Add(this.exitMenuItem);
 
                 // Hook up event handlers
                 this.comPortComboBox.SelectedIndexChanged += this.ComPortComboBox_SelectedIndexChanged!;
                 this.connectMenuItem.Click += this.ConnectMenuItem_Click!;
-                this.disconnectMenuItem.Click += this.DisconnectMenuItem_Click!;
                 this.exitMenuItem.Click += this.ExitMenuItem_Click!;
 
                 // Start the message loop
@@ -92,10 +88,16 @@ namespace VolumeKsharp
 
         private void ConnectMenuItem_Click(object sender, EventArgs e)
         {
-        }
-
-        private void DisconnectMenuItem_Click(object sender, EventArgs e)
-        {
+            if (!this.Controller!.Serialcom.Running)
+            {
+                this.Controller.Serialcom.Start();
+                this.connectMenuItem.Text = "Disconnect";
+            }
+            else
+            {
+                this.Controller.Serialcom.Stop();
+                this.connectMenuItem.Text = "Connect";
+            }
         }
 
         private void ExitMenuItem_Click(object sender, EventArgs e)

@@ -20,8 +20,8 @@ public class SerialCom
 
     private static readonly SerialPort SerialPort = new SerialPort();
     private readonly Controller controller;
-    private readonly Thread readThread;
-    private readonly Thread writeThread;
+    private Thread readThread;
+    private Thread writeThread;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SerialCom"/> class.
@@ -31,7 +31,7 @@ public class SerialCom
     {
         this.controller = controller;
         this.readThread = new Thread(this.Read);
-        this.writeThread = new Thread(Write);
+        this.writeThread = new Thread(this.Write);
         SerialPort.PortName = "com7";
         SerialPort.ReadTimeout = 500;
         SerialPort.WriteTimeout = 500;
@@ -47,17 +47,22 @@ public class SerialCom
         set => SerialPort.PortName = value;
     }
 
-    private static bool Continue { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the connection is running.
+    /// </summary>
+    public bool Running { get; set; }
 
 /// <summary>
 /// Method to start the serial communications.
 /// </summary>
     public void Start()
     {
-        if (Continue == false)
+        if (this.Running == false)
         {
-            Continue = true;
+            this.Running = true;
             SerialPort.Open();
+            this.readThread = new Thread(this.Read);
+            this.writeThread = new Thread(this.Write);
             this.readThread.Start();
             this.writeThread.Start();
         }
@@ -91,23 +96,33 @@ public class SerialCom
     /// <returns>If it stopped correctly.</returns>
     public bool Stop()
     {
-        Continue = false;
+        this.Running = false;
         this.readThread.Join();
+        lock (CommandQueueLock)
+        {
+            Monitor.Pulse(CommandQueueLock);
+        }
+
         this.writeThread.Join();
         SerialPort.Close();
         SerialPort.Dispose();
         return true;
     }
 
-    private static void Write()
+    private void Write()
     {
-        while (Continue)
+        while (this.Running)
         {
             lock (CommandQueueLock)
             {
-                while (AppearanceCommandsQueue.Count == 0)
+                while (AppearanceCommandsQueue.Count == 0 && this.Running)
                 {
                     Monitor.Wait(CommandQueueLock);
+                }
+
+                if (!this.Running)
+                {
+                    break;
                 }
 
                 string? message = AppearanceCommandsQueue.Dequeue().Message;
@@ -121,7 +136,7 @@ public class SerialCom
 
     private void Read()
     {
-        while (Continue)
+        while (this.Running)
         {
             try
             {
