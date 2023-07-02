@@ -22,7 +22,6 @@ public class VolumeMode : IMode
     private bool on;
     private long swoMuted;
     private long swo;
-    private float oldVolume;
     private bool muted;
     private bool mutedOld;
 
@@ -39,7 +38,6 @@ public class VolumeMode : IMode
     public bool IncomingCommands(InputCommands command)
     {
         this.swo = this.sw.ElapsedMilliseconds;
-        this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
         this.mutedOld = this.muted;
         switch (command)
         {
@@ -82,7 +80,7 @@ public class VolumeMode : IMode
     /// <inheritdoc/>
     public void Compute()
     {
-        if (Math.Abs(this.oldVolume - Convert.ToInt32(this.volumeShown)) > Tolerance)
+        if (Math.Abs(this.volume.GetVolume() - this.volumeShown) > Tolerance)
         {
             this.Show();
         }
@@ -115,7 +113,6 @@ public class VolumeMode : IMode
         }
 
         this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volumeShown)));
-        this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
         this.on = true;
     }
 }
