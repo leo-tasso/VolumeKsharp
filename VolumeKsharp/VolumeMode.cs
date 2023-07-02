@@ -16,11 +16,15 @@ public class VolumeMode : IMode
     private const double Tolerance = 1;
     private readonly SerialCom serialcom;
     private readonly Stopwatch sw = Stopwatch.StartNew();
-    private readonly Volume volume = new Volume();
+    private readonly Stopwatch swMuted = Stopwatch.StartNew();
+    private readonly Volume volume = new();
     private double volumeShown;
     private bool on;
+    private long swoMuted;
     private long swo;
     private float oldVolume;
+    private bool muted;
+    private bool mutedOld;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VolumeMode"/> class.
@@ -36,26 +40,41 @@ public class VolumeMode : IMode
     {
         this.swo = this.sw.ElapsedMilliseconds;
         this.oldVolume = Convert.ToInt32(this.volume.GetVolume());
+        this.mutedOld = this.muted;
         switch (command)
         {
             case InputCommands.Minus:
             {
-                this.volume.SetVolume(this.volume.GetVolume() - StepSize);
+                if (this.swMuted.ElapsedMilliseconds > this.swoMuted + 500)
+                {
+                    this.volume.SetVolume(this.volume.GetVolume() - StepSize);
+                }
+
                 break;
             }
 
             case InputCommands.Plus:
-                this.volume.SetVolume(this.volume.GetVolume() + StepSize);
+                if (this.swMuted.ElapsedMilliseconds > this.swoMuted + 500)
+                {
+                    this.volume.SetVolume(this.volume.GetVolume() + StepSize);
+                }
+
                 break;
             case InputCommands.Press:
-                return false;
+                this.muted = !this.muted;
+                this.volume.Muted = this.muted;
+                this.swoMuted = this.swMuted.ElapsedMilliseconds;
+                break;
             case InputCommands.Release:
-                return false;
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
-        this.Show();
+        if (command != InputCommands.Release)
+        {
+            this.Show();
+        }
 
         return true;
     }
@@ -66,6 +85,14 @@ public class VolumeMode : IMode
         if (Math.Abs(this.oldVolume - Convert.ToInt32(this.volumeShown)) > Tolerance)
         {
             this.Show();
+        }
+
+        if (this.mutedOld != this.muted)
+        {
+            if (this.muted)
+            {
+                this.serialcom.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0));
+            }
         }
 
         if (this.sw.ElapsedMilliseconds - this.swo > 500 && this.on)

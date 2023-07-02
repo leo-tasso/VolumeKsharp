@@ -150,6 +150,14 @@ public class SerialCom
                 {
                     this.controller.AddInputCommand(InputCommands.Plus);
                 }
+                else if (message.Equals("0\r"))
+                {
+                    this.controller.AddInputCommand(InputCommands.Release);
+                }
+                else if (message.Equals("o\r"))
+                {
+                    this.controller.AddInputCommand(InputCommands.Press);
+                }
             }
             catch (TimeoutException)
             {
