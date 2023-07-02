@@ -35,7 +35,7 @@ namespace VolumeKsharp
                 this.notifyIcon = new NotifyIcon();
                 this.contextMenu = new ContextMenuStrip();
                 this.notifyIcon.ContextMenuStrip = this.contextMenu;
-                this.notifyIcon.Icon = new System.Drawing.Icon("LayerIcon.ico");
+                this.notifyIcon.Icon = new System.Drawing.Icon("res/VolumeKLogo.ico");
                 this.notifyIcon.Text = "Volumek";
                 this.notifyIcon.Visible = true;
 

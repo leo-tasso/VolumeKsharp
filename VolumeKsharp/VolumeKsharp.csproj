@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <Company>LeonardoTassinari</Company>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <ApplicationIcon>res\VolumeKLogo.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,5 +17,12 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="res\VolumeKLogo.ico" />
+      <Content Include="res\VolumeKLogo.ico">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 </Project>
