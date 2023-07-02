@@ -103,6 +103,7 @@ namespace VolumeKsharp
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
             this.Controller!.Serialcom.Stop();
+            this.Controller.Continue = false;
             this.notifyIcon!.Visible = false;
             Application.Exit();
         }
