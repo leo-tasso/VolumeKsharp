@@ -31,7 +31,10 @@ public class Controller
     /// </summary>
     public SerialCom Serialcom { get; }
 
-    private bool Continue { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the state of the controller thread.
+    /// </summary>
+    public bool Continue { get; set; }
 
     private IMode? Mode { get; set; }
 
@@ -55,7 +58,7 @@ public class Controller
             }
 
             this.Mode.Compute();
-            Thread.Sleep(20);
+            Thread.Sleep(10);
         }
     }
 }

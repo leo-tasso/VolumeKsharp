@@ -42,36 +42,29 @@ public class VolumeMode : IMode
         switch (command)
         {
             case InputCommands.Minus:
-            {
-                if (this.swMuted.ElapsedMilliseconds > this.swoMuted + 500)
-                {
-                    this.volume.SetVolume(this.volume.GetVolume() - StepSize);
-                }
-
+                this.volume.SetVolume(this.volume.GetVolume() - StepSize);
                 break;
-            }
 
             case InputCommands.Plus:
-                if (this.swMuted.ElapsedMilliseconds > this.swoMuted + 500)
-                {
-                    this.volume.SetVolume(this.volume.GetVolume() + StepSize);
-                }
-
+                this.volume.SetVolume(this.volume.GetVolume() + StepSize);
                 break;
+
             case InputCommands.Press:
                 this.muted = !this.muted;
                 this.volume.Muted = this.muted;
                 this.swoMuted = this.swMuted.ElapsedMilliseconds;
                 break;
+
             case InputCommands.Release:
                 break;
+
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
-        if (command != InputCommands.Release)
+        if (this.swMuted.ElapsedMilliseconds > this.swoMuted + 500)
         {
-            this.Show();
+            this.ShowVolume();
         }
 
         return true;
@@ -80,9 +73,12 @@ public class VolumeMode : IMode
     /// <inheritdoc/>
     public void Compute()
     {
-        if (Math.Abs(this.volume.GetVolume() - this.volumeShown) > Tolerance)
+        if (this.swMuted.ElapsedMilliseconds > this.swoMuted + 500)
         {
-            this.Show();
+            if (Math.Abs(this.volume.GetVolume() - this.volumeShown) > Tolerance)
+            {
+                this.ShowVolume();
+            }
         }
 
         if (this.mutedOld != this.muted)
@@ -90,6 +86,11 @@ public class VolumeMode : IMode
             if (this.muted)
             {
                 this.serialcom.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0));
+                this.on = true;
+            }
+            else
+            {
+                this.ShowVolume();
             }
         }
 
@@ -100,7 +101,7 @@ public class VolumeMode : IMode
         }
     }
 
-    private void Show()
+    private void ShowVolume()
     {
         this.swo = this.sw.ElapsedMilliseconds;
         if (this.volumeShown < this.volume.GetVolume())
