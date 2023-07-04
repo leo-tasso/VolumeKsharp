@@ -161,6 +161,7 @@ public class SerialCom
             }
             catch (TimeoutException)
             {
+                this.Read();
             }
         }
     }
