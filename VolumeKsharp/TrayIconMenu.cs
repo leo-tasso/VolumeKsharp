@@ -63,6 +63,7 @@ namespace VolumeKsharp
                 this.comPortComboBox.SelectedIndexChanged += this.ComPortComboBox_SelectedIndexChanged!;
                 this.connectMenuItem.Click += this.ConnectMenuItem_Click!;
                 this.exitMenuItem.Click += this.ExitMenuItem_Click!;
+                Microsoft.Win32.SystemEvents.PowerModeChanged += this.OnPowerModeChanged;
 
                 // Start the message loop
                 Application.Run();
@@ -106,6 +107,16 @@ namespace VolumeKsharp
             this.Controller.Continue = false;
             this.notifyIcon!.Visible = false;
             Application.Exit();
+        }
+
+        private void OnPowerModeChanged(object sender, Microsoft.Win32.PowerModeChangedEventArgs e)
+        {
+            if (e.Mode == Microsoft.Win32.PowerModes.Resume)
+            {
+                // Computer has resumed from sleep, restart serial communication
+                this.Controller!.Serialcom.Stop();
+                this.Controller.Serialcom.Start();
+            }
         }
     }
 }
