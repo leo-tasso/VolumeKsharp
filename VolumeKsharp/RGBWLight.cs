@@ -3,9 +3,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-// ReSharper disable NonReadonlyMemberInGetHashCode
 namespace VolumeKsharp;
 
+// ReSharper disable NonReadonlyMemberInGetHashCode
 using System;
 
 /// <summary>
@@ -27,6 +27,8 @@ public class RgbwLight : IEquatable<RgbwLight>
     public RgbwLight()
         : this(0, 0, 0, 0)
     {
+        this.W = this.MaxValue;
+        this.Brightness = this.MaxValue;
     }
 
     /// <summary>
@@ -47,7 +49,7 @@ public class RgbwLight : IEquatable<RgbwLight>
         this.B = b;
         this.W = w;
         this.State = false;
-        this.Brightness = 0;
+        this.Brightness = this.MaxValue;
     }
 
     /// <summary>
