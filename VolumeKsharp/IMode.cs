@@ -5,6 +5,8 @@
 
 namespace VolumeKsharp;
 
+using System.Threading.Tasks;
+
 /// <summary>
 /// Interface to model a Mode, a specific behaviour
 /// that the knob should have relative to the program.
@@ -21,5 +23,6 @@ public interface IMode
     /// <summary>
     /// Method to compute a normal cycle of the mode.
     /// </summary>
-    public void Compute();
+    /// <returns>>A <see cref="Task"/> representing the asynchronous operation of computing a cycle.</returns>
+    public Task Compute();
 }
