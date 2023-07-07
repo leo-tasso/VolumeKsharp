@@ -71,6 +71,7 @@ public class RgbwLightMqttClient
         string statePayload = string.Format(
             @"{{
     ""state"": ""{0}"",
+    ""color_mode"": ""rgbw"",
     ""brightness"":{1},
     ""color"":{2}
 }}",
@@ -114,15 +115,12 @@ public class RgbwLightMqttClient
 
     private string GenerateAutodiscoveryPayload()
     {
-        // Generate the autodiscovery payload for Home Assistant
-        // Replace the placeholders with appropriate values
         string payload = $@"{{
+    ""schema"":""json"",
     ""name"":""{this.clientId}"",
     ""unique_id"":""{this.clientId}"",
     ""command_topic"":""{$"{this.baseTopic}/set"}"",
     ""state_topic"":""{$"{this.baseTopic}/state"}"",
-    ""schema"":""json"",
-    ""rgb"": true,
     ""optimistic"": false,
     ""brightness"":true,
     ""color_mode"":true,
