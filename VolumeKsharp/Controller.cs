@@ -23,7 +23,7 @@ public class Controller
         this.Continue = true;
         this.Serialcom = new SerialCom(this);
         this.Serialcom.Start();
-        this.Light = new();
+        this.Light = new(this);
         this.RgbwLightMqttClient = new RgbwLightMqttClient("192.168.1.26", 1883, "volumeK", "homeassistant/light/volumeK", this.Light);
         new Thread(this.Update).Start();
     }

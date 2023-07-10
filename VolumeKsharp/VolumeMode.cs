@@ -20,7 +20,7 @@ public class VolumeMode : IMode
     private readonly Stopwatch sw = Stopwatch.StartNew();
     private readonly Stopwatch swMuted = Stopwatch.StartNew();
     private readonly Volume volume = new();
-    private Light lightOld = new();
+    private Light lightOld;
     private double volumeShown;
     private bool showing;
     private bool muted;
@@ -34,6 +34,7 @@ public class VolumeMode : IMode
     {
         this.CalligController = calligController;
         this.serialcom = calligController.Serialcom;
+        this.lightOld = new Light(calligController);
         calligController.RgbwLightMqttClient.UpdateState(calligController.Light);
     }
 
@@ -83,10 +84,10 @@ public class VolumeMode : IMode
             this.CalligController.RgbwLightMqttClient.UpdateState(this.CalligController.Light);
             if (!this.showing)
             {
-                this.UpdateLight(this.CalligController.Light);
+                this.CalligController.Light.UpdateLight();
             }
 
-            this.lightOld = new Light(this.CalligController.Light);
+            this.lightOld = new Light(this.CalligController.Light, this.CalligController);
         }
 
         // Stops clocks to avoid overflows.
@@ -126,27 +127,11 @@ public class VolumeMode : IMode
         // Turn off after having shown the volume.
         if (this.sw.ElapsedMilliseconds > ShowTime && this.showing)
         {
-            this.UpdateLight(this.CalligController.Light);
+            this.CalligController.Light.UpdateLight();
             this.showing = false;
         }
 
         return Task.CompletedTask;
-    }
-
-    private void UpdateLight(Light targetLight)
-    {
-        if (targetLight.State)
-        {
-            this.serialcom.AddCommand(new SolidAppearanceCommand(
-                targetLight.R * targetLight.Brightness / targetLight.MaxValue,
-                targetLight.G * targetLight.Brightness / targetLight.MaxValue,
-                targetLight.B * targetLight.Brightness / targetLight.MaxValue,
-                targetLight.W * targetLight.Brightness / targetLight.MaxValue));
-        }
-        else
-        {
-            this.serialcom.AddCommand(new SolidAppearanceCommand(0, 0, 0, 0));
-        }
     }
 
     private void ShowVolume()

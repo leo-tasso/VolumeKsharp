@@ -17,40 +17,42 @@ public class Light : IEquatable<Light>
     /// <summary>
     /// The max value of the colors.
     /// </summary>
-    // ReSharper disable once ConvertToConstant.Global
-#pragma warning disable SA1401
-    public readonly int MaxValue = 255;
-#pragma warning restore SA1401
+    private readonly int maxValue = 255;
 
-/// <summary>
+    private readonly Controller controller;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Light"/> class.
     /// </summary>
-    public Light()
-        : this(0, 0, 0, 0)
+    /// <param name="controller">The calling controller.</param>
+    public Light(Controller controller)
+        : this(0, 0, 0, 0, controller)
     {
-        this.W = this.MaxValue;
-        this.Brightness = this.MaxValue;
+        this.W = this.maxValue;
+        this.Brightness = this.maxValue;
     }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Light"/> class.
     /// </summary>
     /// <param name="parentLight">The light to copy.</param>
-    public Light(Light parentLight)
-        : this(parentLight.R, parentLight.G, parentLight.B, parentLight.W)
+    /// <param name="controller">The calling controller.</param>
+    public Light(Light parentLight, Controller controller)
+        : this(parentLight.R, parentLight.G, parentLight.B, parentLight.W, controller)
     {
         this.State = parentLight.State;
         this.Brightness = parentLight.Brightness;
     }
 
-    private Light(int r, int g, int b, int w)
+    private Light(int r, int g, int b, int w, Controller controller)
     {
         this.R = r;
         this.G = g;
         this.B = b;
         this.W = w;
+        this.controller = controller;
         this.State = false;
-        this.Brightness = this.MaxValue;
+        this.Brightness = this.maxValue;
     }
 
     /// <summary>
@@ -116,6 +118,25 @@ public class Light : IEquatable<Light>
         return !Equals(left, right);
     }
 
+    /// <summary>
+    /// Method to update the physical light with the current parameters.
+    /// </summary>
+    public void UpdateLight()
+    {
+        if (this.State)
+        {
+            this.controller.Serialcom.AddCommand(new SolidAppearanceCommand(
+                this.R * this.Brightness / this.maxValue,
+                this.G * this.Brightness / this.maxValue,
+                this.B * this.Brightness / this.maxValue,
+                this.W * this.Brightness / this.maxValue));
+        }
+        else
+        {
+            this.controller.Serialcom.AddCommand(new SolidAppearanceCommand(0, 0, 0, 0));
+        }
+    }
+
     /// <inheritdoc/>
     public bool Equals(Light? other)
     {
@@ -129,7 +150,7 @@ public class Light : IEquatable<Light>
             return true;
         }
 
-        return this.MaxValue == other.MaxValue && this.EffectsSet.SetEquals(other.EffectsSet) && this.ActiveEffect == other.ActiveEffect && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
+        return this.maxValue == other.maxValue && this.EffectsSet.SetEquals(other.EffectsSet) && this.ActiveEffect == other.ActiveEffect && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
     }
 
     /// <inheritdoc />
@@ -144,7 +165,7 @@ public class Light : IEquatable<Light>
         var hashCode = default(HashCode);
         hashCode.Add(this.EffectsSet);
         hashCode.Add(this.ActiveEffect);
-        hashCode.Add(this.MaxValue);
+        hashCode.Add(this.maxValue);
         hashCode.Add(this.G);
         hashCode.Add(this.R);
         hashCode.Add(this.B);
