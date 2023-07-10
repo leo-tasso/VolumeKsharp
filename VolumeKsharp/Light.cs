@@ -40,6 +40,8 @@ public class Light : IEquatable<Light>
     public Light(Light parentLight, Controller controller)
         : this(parentLight.R, parentLight.G, parentLight.B, parentLight.W, controller)
     {
+        this.ActiveEffect = new string(parentLight.ActiveEffect);
+        this.EffectsSet = new HashSet<string>(parentLight.EffectsSet);
         this.State = parentLight.State;
         this.Brightness = parentLight.Brightness;
     }
