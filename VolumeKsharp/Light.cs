@@ -59,7 +59,7 @@ public class Light : IEquatable<Light>
     /// Gets the list of effects.
     /// </summary>
     public ISet<string> EffectsSet { get; } = new HashSet<string>(
-        new[] { "Solid", "Rainbow", "Breath" });
+        new[] { "Solid", "Rainbow", "Breath", "colorfade_slow", "colorfade_fast", "flash" });
 
     /// <summary>
     /// Gets or sets the active effect.
