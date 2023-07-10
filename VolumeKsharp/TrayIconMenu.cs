@@ -18,6 +18,7 @@ namespace VolumeKsharp
         private ContextMenuStrip contextMenu = null!;
         private ToolStripComboBox comPortComboBox = null!;
         private ToolStripMenuItem connectMenuItem = null!;
+        private ToolStripMenuItem lightToggleMenuItem = null!;
         private ToolStripMenuItem exitMenuItem = null!;
 
         private Controller? Controller { get; set; }
@@ -53,16 +54,20 @@ namespace VolumeKsharp
 
                 // Create the menu items
                 this.connectMenuItem = new ToolStripMenuItem(this.Controller!.Serialcom.Running ? "Disconnect" : "Connect");
+                this.lightToggleMenuItem = new ToolStripMenuItem("Light");
+                this.lightToggleMenuItem.Checked = this.Controller.Light.State;
                 this.exitMenuItem = new ToolStripMenuItem("Exit");
 
                 // Add the menu items to the context menu
                 this.contextMenu.Items.Add(this.connectMenuItem);
+                this.contextMenu.Items.Add(this.lightToggleMenuItem);
                 this.contextMenu.Items.Add(this.exitMenuItem);
 
                 // Hook up event handlers
                 this.comPortComboBox.SelectedIndexChanged += this.ComPortComboBox_SelectedIndexChanged!;
                 this.connectMenuItem.Click += this.ConnectMenuItem_Click!;
                 this.exitMenuItem.Click += this.ExitMenuItem_Click!;
+                this.lightToggleMenuItem.Click += this.LightToggleMenuItem_Click!;
                 Microsoft.Win32.SystemEvents.PowerModeChanged += this.OnPowerModeChanged;
 
                 // Start the message loop
@@ -117,6 +122,13 @@ namespace VolumeKsharp
                 this.Controller!.Serialcom.Stop();
                 this.Controller.Serialcom.Start();
             }
+        }
+
+        private void LightToggleMenuItem_Click(object sender, EventArgs e)
+        {
+            this.lightToggleMenuItem.Checked = !this.lightToggleMenuItem.Checked;
+            this.Controller!.Light.State = this.lightToggleMenuItem.Checked;
+            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.Light);
         }
     }
 }
