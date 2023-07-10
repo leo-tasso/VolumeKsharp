@@ -16,12 +16,10 @@ public class VolumeMode : IMode
     private const double ChangeRate = 1;
     private const float StepSize = 2;
     private const double Tolerance = 1;
-    private readonly RgbwLightMqttClient rgbwLightMqttClient;
     private readonly SerialCom serialcom;
     private readonly Stopwatch sw = Stopwatch.StartNew();
     private readonly Stopwatch swMuted = Stopwatch.StartNew();
     private readonly Volume volume = new();
-    private readonly Light light;
     private Light lightOld = new();
     private double volumeShown;
     private bool showing;
@@ -31,14 +29,15 @@ public class VolumeMode : IMode
     /// <summary>
     /// Initializes a new instance of the <see cref="VolumeMode"/> class.
     /// </summary>
-    /// <param name="controller">The controller father.</param>
-    public VolumeMode(Controller controller)
+    /// <param name="calligController">The controller father.</param>
+    public VolumeMode(Controller calligController)
     {
-        this.serialcom = controller.Serialcom;
-        this.light = controller.Light;
-        this.rgbwLightMqttClient = controller.RgbwLightMqttClient;
-        this.rgbwLightMqttClient.UpdateState(this.light);
+        this.CalligController = calligController;
+        this.serialcom = calligController.Serialcom;
+        calligController.RgbwLightMqttClient.UpdateState(calligController.Light);
     }
+
+    private Controller CalligController { get; set; }
 
     /// <inheritdoc/>
     public bool IncomingCommands(InputCommands command)
@@ -79,15 +78,15 @@ public class VolumeMode : IMode
     /// <inheritdoc/>
     public Task Compute()
     {
-        if (!this.lightOld.Equals(this.light))
+        if (!this.lightOld.Equals(this.CalligController.Light))
         {
-            this.rgbwLightMqttClient.UpdateState(this.light);
+            this.CalligController.RgbwLightMqttClient.UpdateState(this.CalligController.Light);
             if (!this.showing)
             {
-                this.UpdateLight(this.light);
+                this.UpdateLight(this.CalligController.Light);
             }
 
-            this.lightOld = new Light(this.light);
+            this.lightOld = new Light(this.CalligController.Light);
         }
 
         // Stops clocks to avoid overflows.
@@ -127,7 +126,7 @@ public class VolumeMode : IMode
         // Turn off after having shown the volume.
         if (this.sw.ElapsedMilliseconds > ShowTime && this.showing)
         {
-            this.UpdateLight(this.light);
+            this.UpdateLight(this.CalligController.Light);
             this.showing = false;
         }
 
