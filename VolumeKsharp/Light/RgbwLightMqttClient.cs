@@ -19,7 +19,7 @@ using Newtonsoft.Json.Linq;
 /// </summary>
 public class RgbwLightMqttClient
 {
-    private readonly LightRgbw lightRgbw;
+    private readonly ILightRgbwEffect lightRgbwEffect;
     private readonly IManagedMqttClient mqttClient;
     private readonly string clientId;
     private readonly string baseTopic;
@@ -31,17 +31,17 @@ public class RgbwLightMqttClient
     /// <param name="brokerPort">The Port of the Broker.</param>
     /// <param name="clientId">Your client Id.</param>
     /// <param name="baseTopic">The base topic.</param>
-    /// <param name="lightRgbw">The target Light.</param>
+    /// <param name="lightRgbwEffect">The target Light.</param>
     public RgbwLightMqttClient(
         string brokerIpAddress,
         int brokerPort,
         string clientId,
         string baseTopic,
-        LightRgbw lightRgbw)
+        ILightRgbwEffect lightRgbwEffect)
     {
         this.clientId = clientId;
         this.baseTopic = baseTopic;
-        this.lightRgbw = lightRgbw;
+        this.lightRgbwEffect = lightRgbwEffect;
         var options = new ManagedMqttClientOptionsBuilder()
             .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
             .WithClientOptions(new MqttClientOptionsBuilder()
@@ -65,8 +65,8 @@ public class RgbwLightMqttClient
     /// <summary>
     /// Method to publish a message with the updated state.
     /// </summary>
-    /// <param name="selectedLightRgbw">The relative light.</param>
-    public async void UpdateState(LightRgbw selectedLightRgbw)
+    /// <param name="selectedLightRgbwEffect">The relative light.</param>
+    public async void UpdateState(ILightRgbwEffect selectedLightRgbwEffect)
     {
         string stateTopic = $"homeassistant/light/{this.clientId}/state";
         string statePayload = string.Format(
@@ -77,10 +77,10 @@ public class RgbwLightMqttClient
     ""color"":{2},
     ""effect"":{3}
 }}",
-            selectedLightRgbw.State ? "ON" : "OFF",
-            selectedLightRgbw.Brightness,
-            $"{{\"r\":{selectedLightRgbw.R},\"g\":{selectedLightRgbw.G},\"b\":{selectedLightRgbw.B},\"w\":{selectedLightRgbw.W}}}",
-            "\"" + (selectedLightRgbw.ActiveEffect ?? "Solid") + "\"");
+            selectedLightRgbwEffect.State ? "ON" : "OFF",
+            selectedLightRgbwEffect.Brightness,
+            $"{{\"r\":{selectedLightRgbwEffect.R},\"g\":{selectedLightRgbwEffect.G},\"b\":{selectedLightRgbwEffect.B},\"w\":{selectedLightRgbwEffect.W}}}",
+            "\"" + (selectedLightRgbwEffect.ActiveEffect ?? "Solid") + "\"");
         await this.mqttClient.EnqueueAsync(new MqttApplicationMessageBuilder()
             .WithTopic(stateTopic)
             .WithPayload(statePayload)
@@ -129,7 +129,7 @@ public class RgbwLightMqttClient
     ""color_mode"":true,
     ""supported_color_modes"":[""rgbw""],
     ""effect"":true,
-    ""effect_list"":[{$"{string.Join(", ", this.lightRgbw.EffectsSet.Select(e => "\"" + e + "\"").ToArray())}"}]
+    ""effect_list"":[{$"{string.Join(", ", this.lightRgbwEffect.EffectsSet.Select(e => "\"" + e + "\"").ToArray())}"}]
 }}";
         return payload;
     }
@@ -154,36 +154,36 @@ public class RgbwLightMqttClient
             white = colorObject.Value<int>("w");
         }
 
-        this.lightRgbw.State = state.Equals("ON");
+        this.lightRgbwEffect.State = state.Equals("ON");
 
         if (brightness is not null)
         {
-            this.lightRgbw.Brightness = (int)brightness;
+            this.lightRgbwEffect.Brightness = (int)brightness;
         }
 
         if (red is not null)
         {
-            this.lightRgbw.R = (int)red;
+            this.lightRgbwEffect.R = (int)red;
         }
 
         if (green is not null)
         {
-            this.lightRgbw.G = (int)green;
+            this.lightRgbwEffect.G = (int)green;
         }
 
         if (blue is not null)
         {
-            this.lightRgbw.B = (int)blue;
+            this.lightRgbwEffect.B = (int)blue;
         }
 
         if (white is not null)
         {
-            this.lightRgbw.W = (int)white;
+            this.lightRgbwEffect.W = (int)white;
         }
 
         if (effect is not null)
         {
-            this.lightRgbw.ActiveEffect = effect;
+            this.lightRgbwEffect.ActiveEffect = effect;
         }
     }
 }

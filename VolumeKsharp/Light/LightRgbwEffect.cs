@@ -1,4 +1,4 @@
-﻿// <copyright file="LightRGBW.cs" company="LeonardoTassinari">
+﻿// <copyright file="LightRgbwEffect.cs" company="LeonardoTassinari">
 // Copyright (c) LeonardoTassinari. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -14,41 +14,43 @@ using VolumeKsharp.AppearanceCommands;
 /// <summary>
 /// Class to represent a rgbw light.
 /// </summary>
-public class LightRgbw : ILightRgbw
+public class LightRgbwEffect : ILightRgbwEffect
 {
     /// <summary>
-    /// The max value of the colors.
+    /// The parent controller.
     /// </summary>
-    private readonly int maxValue = 255;
-
     private readonly Controller controller;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LightRgbw"/> class.
+    /// Initializes a new instance of the <see cref="LightRgbwEffect"/> class.
     /// </summary>
     /// <param name="controller">The calling controller.</param>
-    public LightRgbw(Controller controller)
+    public LightRgbwEffect(Controller controller)
         : this(0, 0, 0, 0, controller)
     {
-        this.W = this.maxValue;
-        this.Brightness = this.maxValue;
+        this.W = this.MaxValue;
+        this.Brightness = this.MaxValue;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LightRgbw"/> class.
+    /// Initializes a new instance of the <see cref="LightRgbwEffect"/> class.
     /// </summary>
-    /// <param name="parentLightRgbw">The light to copy.</param>
-    /// <param name="controller">The calling controller.</param>
-    public LightRgbw(LightRgbw parentLightRgbw, Controller controller)
-        : this(parentLightRgbw.R, parentLightRgbw.G, parentLightRgbw.B, parentLightRgbw.W, controller)
+    /// <param name="parentLight">The parent light.</param>
+    /// <param name="parentController">The parent controller.</param>
+    public LightRgbwEffect(ILightRgbwEffect parentLight, Controller parentController)
     {
-        this.ActiveEffect = new string(parentLightRgbw.ActiveEffect);
-        this.EffectsSet = new HashSet<string>(parentLightRgbw.EffectsSet);
-        this.State = parentLightRgbw.State;
-        this.Brightness = parentLightRgbw.Brightness;
+        this.MaxValue = parentLight.MaxValue;
+        this.controller = parentController;
+        this.ActiveEffect = parentLight.ActiveEffect;
+        this.R = parentLight.R;
+        this.G = parentLight.G;
+        this.B = parentLight.B;
+        this.W = parentLight.W;
+        this.Brightness = parentLight.Brightness;
+        this.State = parentLight.State;
     }
 
-    private LightRgbw(int r, int g, int b, int w, Controller controller)
+    private LightRgbwEffect(int r, int g, int b, int w, Controller controller)
     {
         this.R = r;
         this.G = g;
@@ -56,7 +58,7 @@ public class LightRgbw : ILightRgbw
         this.W = w;
         this.controller = controller;
         this.State = false;
-        this.Brightness = this.maxValue;
+        this.Brightness = this.MaxValue;
     }
 
     /// <summary>
@@ -64,6 +66,11 @@ public class LightRgbw : ILightRgbw
     /// </summary>
     public ISet<string> EffectsSet { get; } = new HashSet<string>(
         new[] { "Solid", "Rainbow", "Breath", "colorfade_slow", "colorfade_fast", "flash" });
+
+    /// <summary>
+    /// Gets the max value of the colors.
+    /// </summary>
+    public int MaxValue { get; } = 255;
 
     /// <summary>
     /// Gets or sets the active effect.
@@ -106,7 +113,7 @@ public class LightRgbw : ILightRgbw
     /// <param name="left">The left light.</param>
     /// <param name="right">The right light.</param>
     /// <returns>If they are equal.</returns>
-    public static bool operator ==(LightRgbw? left, LightRgbw? right)
+    public static bool operator ==(LightRgbwEffect? left, LightRgbwEffect? right)
     {
         return Equals(left, right);
     }
@@ -117,7 +124,7 @@ public class LightRgbw : ILightRgbw
     /// <param name="left">The left light.</param>
     /// <param name="right">The right light.</param>
     /// <returns>If they are different.</returns>
-    public static bool operator !=(LightRgbw? left, LightRgbw? right)
+    public static bool operator !=(LightRgbwEffect? left, LightRgbwEffect? right)
     {
         return !Equals(left, right);
     }
@@ -130,10 +137,10 @@ public class LightRgbw : ILightRgbw
         if (this.State)
         {
             this.controller.Communicator.AddCommand(new SolidAppearanceCommand(
-                this.R * this.Brightness / this.maxValue,
-                this.G * this.Brightness / this.maxValue,
-                this.B * this.Brightness / this.maxValue,
-                this.W * this.Brightness / this.maxValue));
+                this.R * this.Brightness / this.MaxValue,
+                this.G * this.Brightness / this.MaxValue,
+                this.B * this.Brightness / this.MaxValue,
+                this.W * this.Brightness / this.MaxValue));
         }
         else
         {
@@ -141,8 +148,8 @@ public class LightRgbw : ILightRgbw
         }
     }
 
-    /// <inheritdoc cref="ILightRgbw.Equals(VolumeKsharp.Light.LightRgbw?)" />
-    public bool Equals(LightRgbw? other)
+    /// <inheritdoc cref="object" />
+    public bool Equals(LightRgbwEffect? other)
     {
         if (ReferenceEquals(null, other))
         {
@@ -154,22 +161,22 @@ public class LightRgbw : ILightRgbw
             return true;
         }
 
-        return this.maxValue == other.maxValue && this.EffectsSet.SetEquals(other.EffectsSet) && this.ActiveEffect == other.ActiveEffect && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
+        return this.MaxValue == other.MaxValue && this.EffectsSet.SetEquals(other.EffectsSet) && this.ActiveEffect == other.ActiveEffect && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
     }
 
-    /// <inheritdoc cref="ILightRgbw.Equals(object?)" />
+    /// <inheritdoc cref="object" />
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || (obj is LightRgbw other && this.Equals(other));
+        return ReferenceEquals(this, obj) || (obj is LightRgbwEffect other && this.Equals(other));
     }
 
-    /// <inheritdoc cref="ILightRgbw.GetHashCode" />
+    /// <inheritdoc cref="object" />
     public override int GetHashCode()
     {
         var hashCode = default(HashCode);
         hashCode.Add(this.EffectsSet);
         hashCode.Add(this.ActiveEffect);
-        hashCode.Add(this.maxValue);
+        hashCode.Add(this.MaxValue);
         hashCode.Add(this.G);
         hashCode.Add(this.R);
         hashCode.Add(this.B);
@@ -177,5 +184,11 @@ public class LightRgbw : ILightRgbw
         hashCode.Add(this.Brightness);
         hashCode.Add(this.State);
         return hashCode.ToHashCode();
+    }
+
+    /// <inheritdoc />
+    public object Clone()
+    {
+        return new LightRgbwEffect(this, this.controller);
     }
 }

@@ -26,8 +26,8 @@ public class Controller
         this.Continue = true;
         this.Communicator = new SerialCom(this);
         this.Communicator.Start();
-        this.LightRgbw = new(this);
-        this.RgbwLightMqttClient = new RgbwLightMqttClient("192.168.1.26", 1883, "volumeK", "homeassistant/light/volumeK", this.LightRgbw);
+        this.LightRgbwEffect = new LightRgbwEffect(this);
+        this.RgbwLightMqttClient = new RgbwLightMqttClient("192.168.1.26", 1883, "volumeK", "homeassistant/light/volumeK", this.LightRgbwEffect);
         new Thread(this.Update).Start();
     }
 
@@ -39,7 +39,7 @@ public class Controller
     /// <summary>
     /// Gets or sets the controller light.
     /// </summary>
-    public LightRgbw LightRgbw { get; set; }
+    public ILightRgbwEffect LightRgbwEffect { get; set; }
 
     /// <summary>
     /// Gets the serialCommunication class of this Controller.

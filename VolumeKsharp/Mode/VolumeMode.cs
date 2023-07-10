@@ -21,7 +21,7 @@ public class VolumeMode : IMode
     private readonly Stopwatch sw = Stopwatch.StartNew();
     private readonly Stopwatch swMuted = Stopwatch.StartNew();
     private readonly Volume volume = new();
-    private LightRgbw lightRgbwOld;
+    private ILight lightRgbwOld;
     private double volumeShown;
     private bool showing;
     private bool muted;
@@ -34,8 +34,7 @@ public class VolumeMode : IMode
     public VolumeMode(Controller calligController)
     {
         this.CalligController = calligController;
-        this.lightRgbwOld = new LightRgbw(calligController);
-        calligController.RgbwLightMqttClient.UpdateState(calligController.LightRgbw);
+        this.lightRgbwOld = (calligController.LightRgbwEffect.Clone() as ILight)!;
     }
 
     private Controller CalligController { get; set; }
@@ -79,15 +78,15 @@ public class VolumeMode : IMode
     /// <inheritdoc/>
     public Task Compute()
     {
-        if (!this.lightRgbwOld.Equals(this.CalligController.LightRgbw))
+        if (!this.lightRgbwOld.Equals(this.CalligController.LightRgbwEffect))
         {
-            this.CalligController.RgbwLightMqttClient.UpdateState(this.CalligController.LightRgbw);
+            this.CalligController.RgbwLightMqttClient.UpdateState(this.CalligController.LightRgbwEffect);
             if (!this.showing)
             {
-                this.CalligController.LightRgbw.UpdateLight();
+                this.CalligController.LightRgbwEffect.UpdateLight();
             }
 
-            this.lightRgbwOld = new LightRgbw(this.CalligController.LightRgbw, this.CalligController);
+            this.lightRgbwOld = (this.CalligController.LightRgbwEffect.Clone() as ILight)!;
         }
 
         // Stops clocks to avoid overflows.
@@ -127,7 +126,7 @@ public class VolumeMode : IMode
         // Turn off after having shown the volume.
         if (this.sw.ElapsedMilliseconds > ShowTime && this.showing)
         {
-            this.CalligController.LightRgbw.UpdateLight();
+            this.CalligController.LightRgbwEffect.UpdateLight();
             this.showing = false;
         }
 

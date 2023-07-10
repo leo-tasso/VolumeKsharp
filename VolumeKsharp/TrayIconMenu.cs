@@ -55,7 +55,7 @@ namespace VolumeKsharp
                 // Create the menu items
                 this.connectMenuItem = new ToolStripMenuItem(this.Controller!.Communicator.Running ? "Disconnect" : "Connect");
                 this.lightToggleMenuItem = new ToolStripMenuItem("Light");
-                this.lightToggleMenuItem.Checked = this.Controller.LightRgbw.State;
+                this.lightToggleMenuItem.Checked = this.Controller.LightRgbwEffect.State;
                 this.exitMenuItem = new ToolStripMenuItem("Exit");
 
                 // Add the menu items to the context menu
@@ -128,8 +128,8 @@ namespace VolumeKsharp
         private void LightToggleMenuItem_Click(object sender, EventArgs e)
         {
             this.lightToggleMenuItem.Checked = !this.lightToggleMenuItem.Checked;
-            this.Controller!.LightRgbw.State = this.lightToggleMenuItem.Checked;
-            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbw);
+            this.Controller!.LightRgbwEffect.State = this.lightToggleMenuItem.Checked;
+            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbwEffect);
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace VolumeKsharp
         /// </summary>
         private void TrayIconOpened(object sender, EventArgs e)
         {
-            this.lightToggleMenuItem.Checked = this.Controller!.LightRgbw.State;
+            this.lightToggleMenuItem.Checked = this.Controller!.LightRgbwEffect.State;
             string[] availablePorts = this.Controller.Communicator.GetPorts();
             this.comPortComboBox.Items.Clear();
 
