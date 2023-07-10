@@ -1,18 +1,20 @@
-﻿// <copyright file="Light.cs" company="LeonardoTassinari">
+﻿// <copyright file="LightRGBW.cs" company="LeonardoTassinari">
 // Copyright (c) LeonardoTassinari. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace VolumeKsharp;
+namespace VolumeKsharp.Light;
 
-// ReSharper disable NonReadonlyMemberInGetHashCode
 using System;
 using System.Collections.Generic;
+using VolumeKsharp.AppearanceCommands;
+
+// ReSharper disable NonReadonlyMemberInGetHashCode
 
 /// <summary>
 /// Class to represent a rgbw light.
 /// </summary>
-public class Light : IEquatable<Light>
+public class LightRgbw : ILightRgbw
 {
     /// <summary>
     /// The max value of the colors.
@@ -22,10 +24,10 @@ public class Light : IEquatable<Light>
     private readonly Controller controller;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Light"/> class.
+    /// Initializes a new instance of the <see cref="LightRgbw"/> class.
     /// </summary>
     /// <param name="controller">The calling controller.</param>
-    public Light(Controller controller)
+    public LightRgbw(Controller controller)
         : this(0, 0, 0, 0, controller)
     {
         this.W = this.maxValue;
@@ -33,20 +35,20 @@ public class Light : IEquatable<Light>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Light"/> class.
+    /// Initializes a new instance of the <see cref="LightRgbw"/> class.
     /// </summary>
-    /// <param name="parentLight">The light to copy.</param>
+    /// <param name="parentLightRgbw">The light to copy.</param>
     /// <param name="controller">The calling controller.</param>
-    public Light(Light parentLight, Controller controller)
-        : this(parentLight.R, parentLight.G, parentLight.B, parentLight.W, controller)
+    public LightRgbw(LightRgbw parentLightRgbw, Controller controller)
+        : this(parentLightRgbw.R, parentLightRgbw.G, parentLightRgbw.B, parentLightRgbw.W, controller)
     {
-        this.ActiveEffect = new string(parentLight.ActiveEffect);
-        this.EffectsSet = new HashSet<string>(parentLight.EffectsSet);
-        this.State = parentLight.State;
-        this.Brightness = parentLight.Brightness;
+        this.ActiveEffect = new string(parentLightRgbw.ActiveEffect);
+        this.EffectsSet = new HashSet<string>(parentLightRgbw.EffectsSet);
+        this.State = parentLightRgbw.State;
+        this.Brightness = parentLightRgbw.Brightness;
     }
 
-    private Light(int r, int g, int b, int w, Controller controller)
+    private LightRgbw(int r, int g, int b, int w, Controller controller)
     {
         this.R = r;
         this.G = g;
@@ -104,7 +106,7 @@ public class Light : IEquatable<Light>
     /// <param name="left">The left light.</param>
     /// <param name="right">The right light.</param>
     /// <returns>If they are equal.</returns>
-    public static bool operator ==(Light? left, Light? right)
+    public static bool operator ==(LightRgbw? left, LightRgbw? right)
     {
         return Equals(left, right);
     }
@@ -115,7 +117,7 @@ public class Light : IEquatable<Light>
     /// <param name="left">The left light.</param>
     /// <param name="right">The right light.</param>
     /// <returns>If they are different.</returns>
-    public static bool operator !=(Light? left, Light? right)
+    public static bool operator !=(LightRgbw? left, LightRgbw? right)
     {
         return !Equals(left, right);
     }
@@ -127,7 +129,7 @@ public class Light : IEquatable<Light>
     {
         if (this.State)
         {
-            this.controller.Serialcom.AddCommand(new SolidAppearanceCommand(
+            this.controller.Communicator.AddCommand(new SolidAppearanceCommand(
                 this.R * this.Brightness / this.maxValue,
                 this.G * this.Brightness / this.maxValue,
                 this.B * this.Brightness / this.maxValue,
@@ -135,12 +137,12 @@ public class Light : IEquatable<Light>
         }
         else
         {
-            this.controller.Serialcom.AddCommand(new SolidAppearanceCommand(0, 0, 0, 0));
+            this.controller.Communicator.AddCommand(new SolidAppearanceCommand(0, 0, 0, 0));
         }
     }
 
-    /// <inheritdoc/>
-    public bool Equals(Light? other)
+    /// <inheritdoc cref="ILightRgbw.Equals(VolumeKsharp.Light.LightRgbw?)" />
+    public bool Equals(LightRgbw? other)
     {
         if (ReferenceEquals(null, other))
         {
@@ -155,13 +157,13 @@ public class Light : IEquatable<Light>
         return this.maxValue == other.maxValue && this.EffectsSet.SetEquals(other.EffectsSet) && this.ActiveEffect == other.ActiveEffect && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="ILightRgbw.Equals(object?)" />
     public override bool Equals(object? obj)
     {
-        return ReferenceEquals(this, obj) || (obj is Light other && this.Equals(other));
+        return ReferenceEquals(this, obj) || (obj is LightRgbw other && this.Equals(other));
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="ILightRgbw.GetHashCode" />
     public override int GetHashCode()
     {
         var hashCode = default(HashCode);

@@ -3,11 +3,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace VolumeKsharp;
+namespace VolumeKsharp.Mode;
 
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using VolumeKsharp.AppearanceCommands;
+using VolumeKsharp.Light;
 
 /// <summary/> mode to show volume status on the ring.
 public class VolumeMode : IMode
@@ -16,11 +18,10 @@ public class VolumeMode : IMode
     private const double ChangeRate = 1;
     private const float StepSize = 2;
     private const double Tolerance = 1;
-    private readonly SerialCom serialcom;
     private readonly Stopwatch sw = Stopwatch.StartNew();
     private readonly Stopwatch swMuted = Stopwatch.StartNew();
     private readonly Volume volume = new();
-    private Light lightOld;
+    private LightRgbw lightRgbwOld;
     private double volumeShown;
     private bool showing;
     private bool muted;
@@ -33,9 +34,8 @@ public class VolumeMode : IMode
     public VolumeMode(Controller calligController)
     {
         this.CalligController = calligController;
-        this.serialcom = calligController.Serialcom;
-        this.lightOld = new Light(calligController);
-        calligController.RgbwLightMqttClient.UpdateState(calligController.Light);
+        this.lightRgbwOld = new LightRgbw(calligController);
+        calligController.RgbwLightMqttClient.UpdateState(calligController.LightRgbw);
     }
 
     private Controller CalligController { get; set; }
@@ -79,15 +79,15 @@ public class VolumeMode : IMode
     /// <inheritdoc/>
     public Task Compute()
     {
-        if (!this.lightOld.Equals(this.CalligController.Light))
+        if (!this.lightRgbwOld.Equals(this.CalligController.LightRgbw))
         {
-            this.CalligController.RgbwLightMqttClient.UpdateState(this.CalligController.Light);
+            this.CalligController.RgbwLightMqttClient.UpdateState(this.CalligController.LightRgbw);
             if (!this.showing)
             {
-                this.CalligController.Light.UpdateLight();
+                this.CalligController.LightRgbw.UpdateLight();
             }
 
-            this.lightOld = new Light(this.CalligController.Light, this.CalligController);
+            this.lightRgbwOld = new LightRgbw(this.CalligController.LightRgbw, this.CalligController);
         }
 
         // Stops clocks to avoid overflows.
@@ -115,7 +115,7 @@ public class VolumeMode : IMode
         {
             if (this.muted)
             {
-                this.serialcom.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0));
+                this.CalligController.Communicator.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0));
                 this.showing = true;
             }
             else
@@ -127,7 +127,7 @@ public class VolumeMode : IMode
         // Turn off after having shown the volume.
         if (this.sw.ElapsedMilliseconds > ShowTime && this.showing)
         {
-            this.CalligController.Light.UpdateLight();
+            this.CalligController.LightRgbw.UpdateLight();
             this.showing = false;
         }
 
@@ -146,7 +146,7 @@ public class VolumeMode : IMode
             this.volumeShown -= ChangeRate;
         }
 
-        this.serialcom.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volumeShown)));
+        this.CalligController.Communicator.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volumeShown)));
         this.showing = true;
     }
 }

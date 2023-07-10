@@ -7,6 +7,9 @@ namespace VolumeKsharp;
 
 using System.Collections.Generic;
 using System.Threading;
+using VolumeKsharp.Communicator;
+using VolumeKsharp.Light;
+using VolumeKsharp.Mode;
 
 /// <summary>
 /// The controller class.
@@ -21,10 +24,10 @@ public class Controller
     public Controller()
     {
         this.Continue = true;
-        this.Serialcom = new SerialCom(this);
-        this.Serialcom.Start();
-        this.Light = new(this);
-        this.RgbwLightMqttClient = new RgbwLightMqttClient("192.168.1.26", 1883, "volumeK", "homeassistant/light/volumeK", this.Light);
+        this.Communicator = new SerialCom(this);
+        this.Communicator.Start();
+        this.LightRgbw = new(this);
+        this.RgbwLightMqttClient = new RgbwLightMqttClient("192.168.1.26", 1883, "volumeK", "homeassistant/light/volumeK", this.LightRgbw);
         new Thread(this.Update).Start();
     }
 
@@ -36,12 +39,12 @@ public class Controller
     /// <summary>
     /// Gets or sets the controller light.
     /// </summary>
-    public Light Light { get; set; }
+    public LightRgbw LightRgbw { get; set; }
 
     /// <summary>
     /// Gets the serialCommunication class of this Controller.
     /// </summary>
-    public SerialCom Serialcom { get; }
+    public ICommunicator Communicator { get; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the state of the controller thread.

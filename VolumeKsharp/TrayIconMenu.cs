@@ -45,17 +45,17 @@ namespace VolumeKsharp
                 this.contextMenu.Items.Add(this.comPortComboBox);
 
                 // Populate the COM port dropdown with available ports
-                string[] availablePorts = this.Controller.Serialcom.GetPorts();
+                string[] availablePorts = this.Controller.Communicator.GetPorts();
 
                 // ReSharper disable once CoVariantArrayConversion
                 this.comPortComboBox.Items.AddRange(availablePorts);
 
-                this.comPortComboBox.SelectedItem = this.Controller.Serialcom.Port.ToUpper();
+                this.comPortComboBox.SelectedItem = this.Controller.Communicator.Port.ToUpper();
 
                 // Create the menu items
-                this.connectMenuItem = new ToolStripMenuItem(this.Controller!.Serialcom.Running ? "Disconnect" : "Connect");
+                this.connectMenuItem = new ToolStripMenuItem(this.Controller!.Communicator.Running ? "Disconnect" : "Connect");
                 this.lightToggleMenuItem = new ToolStripMenuItem("Light");
-                this.lightToggleMenuItem.Checked = this.Controller.Light.State;
+                this.lightToggleMenuItem.Checked = this.Controller.LightRgbw.State;
                 this.exitMenuItem = new ToolStripMenuItem("Exit");
 
                 // Add the menu items to the context menu
@@ -89,27 +89,27 @@ namespace VolumeKsharp
             var controller = this.Controller;
             if (controller is not null)
             {
-                controller.Serialcom.Port = selectedPort;
+                controller.Communicator.Port = selectedPort;
             }
         }
 
         private void ConnectMenuItem_Click(object sender, EventArgs e)
         {
-            if (!this.Controller!.Serialcom.Running)
+            if (!this.Controller!.Communicator.Running)
             {
-                this.Controller.Serialcom.Start();
+                this.Controller.Communicator.Start();
                 this.connectMenuItem.Text = "Disconnect";
             }
             else
             {
-                this.Controller.Serialcom.Stop();
+                this.Controller.Communicator.Stop();
                 this.connectMenuItem.Text = "Connect";
             }
         }
 
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
-            this.Controller!.Serialcom.Stop();
+            this.Controller!.Communicator.Stop();
             this.Controller.Continue = false;
             this.notifyIcon!.Visible = false;
             Application.Exit();
@@ -120,16 +120,16 @@ namespace VolumeKsharp
             if (e.Mode == Microsoft.Win32.PowerModes.Resume)
             {
                 // Computer has resumed from sleep, restart serial communication
-                this.Controller!.Serialcom.Stop();
-                this.Controller.Serialcom.Start();
+                this.Controller!.Communicator.Stop();
+                this.Controller.Communicator.Start();
             }
         }
 
         private void LightToggleMenuItem_Click(object sender, EventArgs e)
         {
             this.lightToggleMenuItem.Checked = !this.lightToggleMenuItem.Checked;
-            this.Controller!.Light.State = this.lightToggleMenuItem.Checked;
-            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.Light);
+            this.Controller!.LightRgbw.State = this.lightToggleMenuItem.Checked;
+            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbw);
         }
 
         /// <summary>
@@ -137,8 +137,8 @@ namespace VolumeKsharp
         /// </summary>
         private void TrayIconOpened(object sender, EventArgs e)
         {
-            this.lightToggleMenuItem.Checked = this.Controller!.Light.State;
-            string[] availablePorts = this.Controller.Serialcom.GetPorts();
+            this.lightToggleMenuItem.Checked = this.Controller!.LightRgbw.State;
+            string[] availablePorts = this.Controller.Communicator.GetPorts();
             this.comPortComboBox.Items.Clear();
 
             // ReSharper disable once CoVariantArrayConversion

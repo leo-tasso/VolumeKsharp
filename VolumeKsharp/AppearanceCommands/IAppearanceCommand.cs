@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-namespace VolumeKsharp;
+namespace VolumeKsharp.AppearanceCommands;
 
 /// <summary>
 /// Command that tells the knob what aspect should have.
