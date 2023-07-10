@@ -23,8 +23,20 @@ public class Controller
         this.Continue = true;
         this.Serialcom = new SerialCom(this);
         this.Serialcom.Start();
+        this.Light = new();
+        this.RgbwLightMqttClient = new RgbwLightMqttClient("192.168.1.26", 1883, "volumeK", "homeassistant/light/volumeK", this.Light);
         new Thread(this.Update).Start();
     }
+
+    /// <summary>
+    /// Gets or sets the mqtt api.
+    /// </summary>
+    public RgbwLightMqttClient RgbwLightMqttClient { get; set; }
+
+    /// <summary>
+    /// Gets or sets the controller light.
+    /// </summary>
+    public Light Light { get; set; }
 
     /// <summary>
     /// Gets the serialCommunication class of this Controller.
@@ -49,7 +61,7 @@ public class Controller
 
     private void Update()
     {
-        this.Mode = new VolumeMode(this.Serialcom);
+        this.Mode = new VolumeMode(this);
         while (this.Continue)
         {
             if (InputCommandsQueue.Count > 0)

@@ -21,7 +21,7 @@ public class VolumeMode : IMode
     private readonly Stopwatch sw = Stopwatch.StartNew();
     private readonly Stopwatch swMuted = Stopwatch.StartNew();
     private readonly Volume volume = new();
-    private readonly Light light = new();
+    private readonly Light light;
     private Light lightOld = new();
     private double volumeShown;
     private bool showing;
@@ -31,11 +31,12 @@ public class VolumeMode : IMode
     /// <summary>
     /// Initializes a new instance of the <see cref="VolumeMode"/> class.
     /// </summary>
-    /// <param name="serialcom"> the serial communicator that will be used.</param>
-    public VolumeMode(SerialCom serialcom)
+    /// <param name="controller">The controller father.</param>
+    public VolumeMode(Controller controller)
     {
-        this.serialcom = serialcom;
-        this.rgbwLightMqttClient = new RgbwLightMqttClient("192.168.1.26", 1883, "volumeK", "homeassistant/light/volumeK", this.light);
+        this.serialcom = controller.Serialcom;
+        this.light = controller.Light;
+        this.rgbwLightMqttClient = controller.RgbwLightMqttClient;
         this.rgbwLightMqttClient.UpdateState(this.light);
     }
 
