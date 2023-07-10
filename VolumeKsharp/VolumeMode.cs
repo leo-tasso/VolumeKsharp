@@ -21,8 +21,8 @@ public class VolumeMode : IMode
     private readonly Stopwatch sw = Stopwatch.StartNew();
     private readonly Stopwatch swMuted = Stopwatch.StartNew();
     private readonly Volume volume = new();
-    private readonly RgbwLight light = new();
-    private RgbwLight lightOld = new();
+    private readonly Light light = new();
+    private Light lightOld = new();
     private double volumeShown;
     private bool showing;
     private bool muted;
@@ -86,7 +86,7 @@ public class VolumeMode : IMode
                 this.UpdateLight(this.light);
             }
 
-            this.lightOld = new RgbwLight(this.light);
+            this.lightOld = new Light(this.light);
         }
 
         // Stops clocks to avoid overflows.
@@ -133,7 +133,7 @@ public class VolumeMode : IMode
         return Task.CompletedTask;
     }
 
-    private void UpdateLight(RgbwLight targetLight)
+    private void UpdateLight(Light targetLight)
     {
         if (targetLight.State)
         {

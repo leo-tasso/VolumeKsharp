@@ -126,7 +126,7 @@ public class SerialCom
                 }
 
                 string? message = AppearanceCommandsQueue.Dequeue().Message;
-                if (message != null)
+                if (message is not null)
                 {
                     SerialPort.WriteLine(message);
                 }

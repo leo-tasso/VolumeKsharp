@@ -6,6 +6,7 @@
 namespace VolumeKsharp;
 
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
@@ -18,7 +19,7 @@ using Newtonsoft.Json.Linq;
 /// </summary>
 public class RgbwLightMqttClient
 {
-    private readonly RgbwLight rgbwLight;
+    private readonly Light light;
     private readonly IManagedMqttClient mqttClient;
     private readonly string clientId;
     private readonly string baseTopic;
@@ -30,17 +31,17 @@ public class RgbwLightMqttClient
     /// <param name="brokerPort">The Port of the Broker.</param>
     /// <param name="clientId">Your client Id.</param>
     /// <param name="baseTopic">The base topic.</param>
-    /// <param name="rgbwLight">The target Light.</param>
+    /// <param name="light">The target Light.</param>
     public RgbwLightMqttClient(
         string brokerIpAddress,
         int brokerPort,
         string clientId,
         string baseTopic,
-        RgbwLight rgbwLight)
+        Light light)
     {
         this.clientId = clientId;
         this.baseTopic = baseTopic;
-        this.rgbwLight = rgbwLight;
+        this.light = light;
         var options = new ManagedMqttClientOptionsBuilder()
             .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
             .WithClientOptions(new MqttClientOptionsBuilder()
@@ -64,8 +65,8 @@ public class RgbwLightMqttClient
     /// <summary>
     /// Method to publish a message with the updated state.
     /// </summary>
-    /// <param name="light">The relative light.</param>
-    public async void UpdateState(RgbwLight light)
+    /// <param name="selectedLight">The relative light.</param>
+    public async void UpdateState(Light selectedLight)
     {
         string stateTopic = $"homeassistant/light/{this.clientId}/state";
         string statePayload = string.Format(
@@ -73,11 +74,13 @@ public class RgbwLightMqttClient
     ""state"": ""{0}"",
     ""color_mode"": ""rgbw"",
     ""brightness"":{1},
-    ""color"":{2}
+    ""color"":{2},
+    ""effect"":{3}
 }}",
-            light.State ? "ON" : "OFF",
-            light.Brightness,
-            $"{{\"r\":{light.R},\"g\":{light.G},\"b\":{light.B},\"w\":{light.W}}}");
+            selectedLight.State ? "ON" : "OFF",
+            selectedLight.Brightness,
+            $"{{\"r\":{selectedLight.R},\"g\":{selectedLight.G},\"b\":{selectedLight.B},\"w\":{selectedLight.W}}}",
+            "\"" + (selectedLight.ActiveEffect ?? "Solid") + "\"");
         await this.mqttClient.EnqueueAsync(new MqttApplicationMessageBuilder()
             .WithTopic(stateTopic)
             .WithPayload(statePayload)
@@ -124,26 +127,26 @@ public class RgbwLightMqttClient
     ""optimistic"": false,
     ""brightness"":true,
     ""color_mode"":true,
-    ""supported_color_modes"":[""rgbw""]
+    ""supported_color_modes"":[""rgbw""],
+    ""effect"":true,
+    ""effect_list"":[{$"{string.Join(", ", this.light.EffectsSet.Select(e => "\"" + e + "\"").ToArray())}"}]
 }}";
         return payload;
     }
 
     private void ProcessCommand(string command)
     {
-        // Process the received command
-        // Parse the command payload (in JSON format) and perform the necessary actions
-        // Example:
         // Parse the command payload (in JSON format)
         var payloadObject = JObject.Parse(command);
         string state = payloadObject.Value<string>("state") ?? string.Empty;
         var brightness = payloadObject.Value<int?>("brightness");
         var colorObject = payloadObject.Value<JObject?>("color");
+        string? effect = payloadObject.Value<string?>("effect");
         int? red = null;
         int? green = null;
         int? blue = null;
         int? white = null;
-        if (colorObject != null)
+        if (colorObject is not null)
         {
             red = colorObject.Value<int>("r");
             green = colorObject.Value<int>("g");
@@ -151,31 +154,36 @@ public class RgbwLightMqttClient
             white = colorObject.Value<int>("w");
         }
 
-        this.rgbwLight.State = state.Equals("ON");
+        this.light.State = state.Equals("ON");
 
-        if (brightness != null)
+        if (brightness is not null)
         {
-            this.rgbwLight.Brightness = (int)brightness;
+            this.light.Brightness = (int)brightness;
         }
 
-        if (red != null)
+        if (red is not null)
         {
-            this.rgbwLight.R = (int)red;
+            this.light.R = (int)red;
         }
 
-        if (green != null)
+        if (green is not null)
         {
-            this.rgbwLight.G = (int)green;
+            this.light.G = (int)green;
         }
 
-        if (blue != null)
+        if (blue is not null)
         {
-            this.rgbwLight.B = (int)blue;
+            this.light.B = (int)blue;
         }
 
-        if (white != null)
+        if (white is not null)
         {
-            this.rgbwLight.W = (int)white;
+            this.light.W = (int)white;
+        }
+
+        if (effect is not null)
+        {
+            this.light.ActiveEffect = effect;
         }
     }
 }

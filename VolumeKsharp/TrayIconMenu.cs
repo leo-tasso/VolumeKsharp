@@ -81,7 +81,7 @@ namespace VolumeKsharp
             // Get the selected COM port from the dropdown
             string selectedPort = this.comPortComboBox.SelectedItem.ToString() ?? string.Empty;
             var controller = this.Controller;
-            if (controller != null)
+            if (controller is not null)
             {
                 controller.Serialcom.Port = selectedPort;
             }
