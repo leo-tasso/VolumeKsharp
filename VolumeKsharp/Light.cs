@@ -129,7 +129,7 @@ public class Light : IEquatable<Light>
             return true;
         }
 
-        return this.MaxValue == other.MaxValue && this.EffectsSet.Equals(other.EffectsSet) && this.ActiveEffect == other.ActiveEffect && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
+        return this.MaxValue == other.MaxValue && this.EffectsSet.SetEquals(other.EffectsSet) && this.ActiveEffect == other.ActiveEffect && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
     }
 
     /// <inheritdoc />
