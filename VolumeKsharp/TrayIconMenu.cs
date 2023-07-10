@@ -68,6 +68,7 @@ namespace VolumeKsharp
                 this.connectMenuItem.Click += this.ConnectMenuItem_Click!;
                 this.exitMenuItem.Click += this.ExitMenuItem_Click!;
                 this.lightToggleMenuItem.Click += this.LightToggleMenuItem_Click!;
+                this.notifyIcon.Click += this.TrayIconOpened!;
                 Microsoft.Win32.SystemEvents.PowerModeChanged += this.OnPowerModeChanged;
 
                 // Start the message loop
@@ -129,6 +130,19 @@ namespace VolumeKsharp
             this.lightToggleMenuItem.Checked = !this.lightToggleMenuItem.Checked;
             this.Controller!.Light.State = this.lightToggleMenuItem.Checked;
             this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.Light);
+        }
+
+        /// <summary>
+        /// Event handler for when the tray icon opens.
+        /// </summary>
+        private void TrayIconOpened(object sender, EventArgs e)
+        {
+            this.lightToggleMenuItem.Checked = this.Controller!.Light.State;
+            string[] availablePorts = this.Controller.Serialcom.GetPorts();
+            this.comPortComboBox.Items.Clear();
+
+            // ReSharper disable once CoVariantArrayConversion
+            this.comPortComboBox.Items.AddRange(availablePorts);
         }
     }
 }
