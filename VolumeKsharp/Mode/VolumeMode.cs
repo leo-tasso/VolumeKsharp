@@ -114,7 +114,7 @@ public class VolumeMode : IMode
         {
             if (this.muted)
             {
-                this.CalligController.Communicator.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0));
+                this.CalligController.Communicator.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0, this.CalligController.LightRgbwEffect.Brightness < 20 ? 20 : this.CalligController.LightRgbwEffect.Brightness));
                 this.showing = true;
             }
             else
@@ -145,7 +145,7 @@ public class VolumeMode : IMode
             this.volumeShown -= ChangeRate;
         }
 
-        this.CalligController.Communicator.AddCommand(new PercentageAppearanceCommand(Convert.ToInt32(this.volumeShown)));
+        this.CalligController.Communicator.AddCommand(new PercentageAppearanceCommand(0, this.CalligController.LightRgbwEffect.MaxValue, 0, 0, this.CalligController.LightRgbwEffect.Brightness < 20 ? 20 : this.CalligController.LightRgbwEffect.Brightness, Convert.ToSingle(this.volumeShown)));
         this.showing = true;
     }
 }

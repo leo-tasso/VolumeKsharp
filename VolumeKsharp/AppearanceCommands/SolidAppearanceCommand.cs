@@ -15,9 +15,10 @@ public class SolidAppearanceCommand : IAppearanceCommand
     /// <param name="g">The Green value.</param>
     /// <param name="b">The Blue value.</param>
     /// <param name="w">The White value.</param>
-    public SolidAppearanceCommand(int r, int g, int b, int w)
+    /// <param name="brightness">The Brightness value.</param>
+    public SolidAppearanceCommand(int r, int g, int b, int w, int brightness)
     {
-        this.Message = "s" + r.ToString().PadLeft(3, '0') + "," + g.ToString().PadLeft(3, '0') + "," + b.ToString().PadLeft(3, '0') + "," + w.ToString().PadLeft(3, '0');
+        this.Message = "s" + r.ToString().PadLeft(3, '0') + "," + g.ToString().PadLeft(3, '0') + "," + b.ToString().PadLeft(3, '0') + "," + w.ToString().PadLeft(3, '0') + "," + brightness.ToString().PadLeft(3, '0');
     }
 
     /// <inheritdoc />

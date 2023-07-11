@@ -16,6 +16,8 @@ using VolumeKsharp.AppearanceCommands;
 /// </summary>
 public class LightRgbwEffect : ILightRgbwEffect
 {
+    private const int Speed = 50;
+
     /// <summary>
     /// The parent controller.
     /// </summary>
@@ -37,7 +39,7 @@ public class LightRgbwEffect : ILightRgbwEffect
     /// </summary>
     /// <param name="parentLight">The parent light.</param>
     /// <param name="parentController">The parent controller.</param>
-    public LightRgbwEffect(ILightRgbwEffect parentLight, Controller parentController)
+    private LightRgbwEffect(ILightRgbwEffect parentLight, Controller parentController)
     {
         this.MaxValue = parentLight.MaxValue;
         this.controller = parentController;
@@ -136,15 +138,19 @@ public class LightRgbwEffect : ILightRgbwEffect
     {
         if (this.State)
         {
-            this.controller.Communicator.AddCommand(new SolidAppearanceCommand(
-                this.R * this.Brightness / this.MaxValue,
-                this.G * this.Brightness / this.MaxValue,
-                this.B * this.Brightness / this.MaxValue,
-                this.W * this.Brightness / this.MaxValue));
+            switch (this.ActiveEffect)
+            {
+                case "Breath":
+                    this.controller.Communicator.AddCommand(new BreathAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, Speed));
+                    break;
+                default:
+                    this.SolidUpdate();
+                    break;
+            }
         }
         else
         {
-            this.controller.Communicator.AddCommand(new SolidAppearanceCommand(0, 0, 0, 0));
+            this.controller.Communicator.AddCommand(new SolidAppearanceCommand(0, 0, 0, 0, 0));
         }
     }
 
@@ -190,5 +196,15 @@ public class LightRgbwEffect : ILightRgbwEffect
     public object Clone()
     {
         return new LightRgbwEffect(this, this.controller);
+    }
+
+    private void SolidUpdate()
+    {
+        this.controller.Communicator.AddCommand(new SolidAppearanceCommand(
+            this.R,
+            this.G,
+            this.B,
+            this.W,
+            this.Brightness));
     }
 }
