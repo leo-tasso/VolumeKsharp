@@ -16,10 +16,10 @@ using VolumeKsharp.AppearanceCommands;
 /// </summary>
 public class SerialCom : ICommunicator
 {
-    private static readonly Queue<IAppearanceCommand> AppearanceCommandsQueue = new Queue<IAppearanceCommand>();
-    private static readonly object CommandQueueLock = new object();
+    private static readonly Queue<IAppearanceCommand> AppearanceCommandsQueue = new();
+    private static readonly object CommandQueueLock = new();
 
-    private static readonly SerialPort SerialPort = new SerialPort();
+    private static readonly SerialPort SerialPort = new();
     private readonly Controller controller;
     private Thread readThread;
     private Thread writeThread;
@@ -33,7 +33,11 @@ public class SerialCom : ICommunicator
         this.controller = controller;
         this.readThread = new Thread(this.Read);
         this.writeThread = new Thread(this.Write);
-        SerialPort.PortName = "com7";
+        if (this.GetPorts().Length > 0)
+        {
+            SerialPort.PortName = SerialPort.GetPortNames()[0];
+        }
+
         SerialPort.ReadTimeout = 500;
         SerialPort.WriteTimeout = 500;
         SerialPort.DtrEnable = true;
