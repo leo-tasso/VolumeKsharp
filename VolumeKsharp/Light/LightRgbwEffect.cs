@@ -68,7 +68,7 @@ public class LightRgbwEffect : ILightRgbwEffect, IEquatable<LightRgbwEffect>
     /// Gets the list of effects.
     /// </summary>
     public ISet<string> EffectsSet { get; } = new HashSet<string>(
-        new[] { "Solid", "Rainbow", "Breath", "colorfade_slow", "colorfade_fast", "flash" });
+        new[] { "Solid", "Rainbow", "Breath", "Chase" });
 
     /// <summary>
     /// Gets the max value of the colors.
@@ -146,6 +146,9 @@ public class LightRgbwEffect : ILightRgbwEffect, IEquatable<LightRgbwEffect>
             {
                 case "Breath":
                     this.controller.Communicator.AddCommand(new BreathAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, this.EffectSpeed));
+                    break;
+                case "Chase":
+                    this.controller.Communicator.AddCommand(new ChaseAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, this.EffectSpeed));
                     break;
                 default:
                     this.SolidUpdate();

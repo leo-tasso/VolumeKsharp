@@ -3,16 +3,16 @@
 
 #define NUM_LEDS 17
 #define DATA_PIN 2
-#define encoder0PinA  5
-#define encoder0PinB  6
-#define buttonPin  7
-#define delai  20
+#define encoder0PinA 5
+#define encoder0PinB 6
+#define buttonPin 7
+#define delai 20
 
 #define MIN_BRIGHTNESS 0
 #define MAX_BRIGHTNESS 255
 
 CRGBW leds[NUM_LEDS];
-CRGB *ledsRGB = (CRGB *) &leds[0];
+CRGB *ledsRGB = (CRGB *)&leds[0];
 
 uint8_t brightness = 255;
 unsigned long int tim = 0;
@@ -28,7 +28,7 @@ void doEncoder() {
   int a = digitalRead(encoder0PinA);
   int b = digitalRead(encoder0PinB);
 
-  if (millis() > tim + delai && !a ) {
+  if (millis() > tim + delai && !a) {
     tim = millis();
     if (b == 0) {
       Serial.println("-");
@@ -39,8 +39,7 @@ void doEncoder() {
 }
 
 // the setup function runs once when you press reset or power the board
-void setup()
-{
+void setup() {
 
   FastLED.addLeds<WS2812B, DATA_PIN, RGB>(ledsRGB, getRGBWsize(NUM_LEDS));
   FastLED.setBrightness(brightness);
@@ -52,16 +51,15 @@ void setup()
 
   attachInterrupt(digitalPinToInterrupt(encoder0PinA), doEncoder, FALLING);
   //attachInterrupt(digitalPinToInterrupt(encoder0PinB), updateEncoder, CHANGE);
-  Serial.begin (9600);
+  Serial.begin(9600);
 }
 
 
-void loop()
-{
+void loop() {
 
   buttonS = digitalRead(buttonPin);
-  if (buttonS == LOW && buttonSo == HIGH)Serial.println("o");
-  if (buttonS == HIGH && buttonSo == LOW)Serial.println("0");
+  if (buttonS == LOW && buttonSo == HIGH) Serial.println("o");
+  if (buttonS == HIGH && buttonSo == LOW) Serial.println("0");
 
   buttonSo = buttonS;
 
@@ -76,16 +74,14 @@ void loop()
       percentage = incoming.substring(21, 26).toFloat();
       mode = 8;
       CangeCol();
-    }
-    else if (incoming[0] == 's') {
+    } else if (incoming[0] == 's') {
       r = incoming.substring(1, 4).toInt();
       g = incoming.substring(5, 8).toInt();
       b = incoming.substring(9, 12).toInt();
       w = incoming.substring(13, 16).toInt();
       brightness = incoming.substring(17, 20).toInt();
       mode = 1;
-    }
-    else if (incoming[0] == 'b') {
+    } else if (incoming[0] == 'b') {
       r = incoming.substring(1, 4).toInt();
       g = incoming.substring(5, 8).toInt();
       b = incoming.substring(9, 12).toInt();
@@ -93,8 +89,15 @@ void loop()
       brightness = incoming.substring(17, 20).toInt();
       lightSpeed = incoming.substring(21, 24).toInt();
       mode = 6;
-    }
-    else mode = incoming.toInt();
+    } else if (incoming[0] == 'c') {
+      r = incoming.substring(1, 4).toInt();
+      g = incoming.substring(5, 8).toInt();
+      b = incoming.substring(9, 12).toInt();
+      w = incoming.substring(13, 16).toInt();
+      brightness = incoming.substring(17, 20).toInt();
+      lightSpeed = incoming.substring(21, 24).toInt();
+      mode = 7;
+    } else mode = incoming.toInt();
   }
   CangeCol();
 }
@@ -131,8 +134,7 @@ void rainbow() {
     FastLED.setBrightness(brightness);
     FastLED.show();
     hue++;
-  }
-  else {
+  } else {
     CangeCol();
   }
 }
@@ -145,8 +147,7 @@ void rainbowLoop() {
 }
 
 
-void breath()
-{
+void breath() {
   static uint8_t hue;
   for (int i = 0; i < NUM_LEDS; i++) {
     leds[i] = CRGBW(r, g, b, w);
@@ -157,20 +158,26 @@ void breath()
   FastLED.show();
   //CangeCol();
 }
-void chaseGreen() {
+void chase() {
   for (int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGBW(0, 255 - ((255 / NUM_LEDS * i) + (millis() / 10) % 255), 0, 0);
+    leds[i] = CRGBW(chaseColor(r, i), chaseColor(g, i), chaseColor(b, i), chaseColor(w, i));
   }
+  FastLED.setBrightness(brightness);
   FastLED.show();
 }
+
+int chaseColor(int val, int num) {
+  return (val - ((val / NUM_LEDS * num) + (millis() * lightSpeed / 1000) % val));
+}
+
 void progress() {
   float partialLight = (percentage * (float)NUM_LEDS / 100) - (int)(percentage * (float)NUM_LEDS / 100);
   for (int i = 0; i < NUM_LEDS; i++) {
-    FastLED.setBrightness(brightness);
     if (i < percentage * (float)NUM_LEDS / 100) leds[i] = CRGBW(r, g, b, w);
     else if (i - 1 < percentage * (float)NUM_LEDS / 100) leds[i] = CRGBW(r * partialLight, g * partialLight, b * partialLight, w * partialLight);
     else leds[i] = CRGBW(0, 0, 0, 0);
   }
+  FastLED.setBrightness(brightness);
   FastLED.show();
 }
 void CangeCol() {
@@ -194,7 +201,7 @@ void CangeCol() {
       breath();
       break;
     case 7:
-      chaseGreen();
+      chase();
       break;
     case 8:
       progress();
