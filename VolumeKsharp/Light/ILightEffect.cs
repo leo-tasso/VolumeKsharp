@@ -21,4 +21,9 @@ public interface ILightEffect : ILight
     /// Gets or sets the active effect.
     /// </summary>
     string? ActiveEffect { get; set; }
+
+    /// <summary>
+    /// Gets or sets the speed of the effect, might be not used by all effects.
+    /// </summary>
+    int EffectSpeed { get; set; }
 }

@@ -14,10 +14,8 @@ using VolumeKsharp.AppearanceCommands;
 /// <summary>
 /// Class to represent a rgbw light.
 /// </summary>
-public class LightRgbwEffect : ILightRgbwEffect
+public class LightRgbwEffect : ILightRgbwEffect, IEquatable<LightRgbwEffect>
 {
-    private const int Speed = 50;
-
     /// <summary>
     /// The parent controller.
     /// </summary>
@@ -32,6 +30,7 @@ public class LightRgbwEffect : ILightRgbwEffect
     {
         this.W = this.MaxValue;
         this.Brightness = this.MaxValue;
+        this.EffectSpeed = this.MaxValue / 2;
     }
 
     /// <summary>
@@ -50,6 +49,7 @@ public class LightRgbwEffect : ILightRgbwEffect
         this.W = parentLight.W;
         this.Brightness = parentLight.Brightness;
         this.State = parentLight.State;
+        this.EffectSpeed = parentLight.EffectSpeed;
     }
 
     private LightRgbwEffect(int r, int g, int b, int w, Controller controller)
@@ -61,6 +61,7 @@ public class LightRgbwEffect : ILightRgbwEffect
         this.controller = controller;
         this.State = false;
         this.Brightness = this.MaxValue;
+        this.EffectSpeed = this.MaxValue / 2;
     }
 
     /// <summary>
@@ -78,6 +79,9 @@ public class LightRgbwEffect : ILightRgbwEffect
     /// Gets or sets the active effect.
     /// </summary>
     public string? ActiveEffect { get; set; }
+
+    /// <inheritdoc />
+    public int EffectSpeed { get; set; }
 
     /// <summary>
     /// Gets or sets red value.
@@ -141,7 +145,7 @@ public class LightRgbwEffect : ILightRgbwEffect
             switch (this.ActiveEffect)
             {
                 case "Breath":
-                    this.controller.Communicator.AddCommand(new BreathAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, Speed));
+                    this.controller.Communicator.AddCommand(new BreathAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, this.EffectSpeed));
                     break;
                 default:
                     this.SolidUpdate();
@@ -167,7 +171,7 @@ public class LightRgbwEffect : ILightRgbwEffect
             return true;
         }
 
-        return this.MaxValue == other.MaxValue && this.EffectsSet.SetEquals(other.EffectsSet) && this.ActiveEffect == other.ActiveEffect && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
+        return this.controller.Equals(other.controller) && this.EffectsSet.SetEquals(other.EffectsSet) && this.MaxValue == other.MaxValue && this.ActiveEffect == other.ActiveEffect && this.EffectSpeed == other.EffectSpeed && this.R == other.R && this.G == other.G && this.B == other.B && this.W == other.W && this.Brightness == other.Brightness && this.State == other.State;
     }
 
     /// <inheritdoc cref="object" />
@@ -180,11 +184,13 @@ public class LightRgbwEffect : ILightRgbwEffect
     public override int GetHashCode()
     {
         var hashCode = default(HashCode);
+        hashCode.Add(this.controller);
         hashCode.Add(this.EffectsSet);
-        hashCode.Add(this.ActiveEffect);
         hashCode.Add(this.MaxValue);
-        hashCode.Add(this.G);
+        hashCode.Add(this.ActiveEffect);
+        hashCode.Add(this.EffectSpeed);
         hashCode.Add(this.R);
+        hashCode.Add(this.G);
         hashCode.Add(this.B);
         hashCode.Add(this.W);
         hashCode.Add(this.Brightness);

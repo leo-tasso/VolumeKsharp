@@ -3,14 +3,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+// ReSharper disable CoVariantArrayConversion
 namespace VolumeKsharp
 {
     using System;
+    using System.Drawing;
     using System.Threading;
     using System.Windows.Forms;
 
     /// <summary>
-    /// The class to create and manage the tray icon.
+    /// Class of the windows tray icon.
     /// </summary>
     public class TrayIconMenu
     {
@@ -20,50 +22,76 @@ namespace VolumeKsharp
         private ToolStripMenuItem connectMenuItem = null!;
         private ToolStripMenuItem lightToggleMenuItem = null!;
         private ToolStripMenuItem exitMenuItem = null!;
+        private Label brightnessLabel = null!;
+        private Label speedLabel = null!;
+        private TrackBar brightnessSlider = null!;
+        private TrackBar speedSlider = null!;
 
         private Controller? Controller { get; set; }
 
         /// <summary>
-        /// Method to start the thread.
+        /// Thread of the tray icon.
         /// </summary>
-        /// <param name="masterController">The Main controller.</param>
+        /// <param name="masterController">The calling controller.</param>
         public void ContextMenuThread(Controller masterController)
         {
-            // Create a new thread to host the context menu strip and message loop
             Thread contextMenuThread = new Thread(() =>
             {
                 this.Controller = masterController;
                 this.notifyIcon = new NotifyIcon();
                 this.contextMenu = new ContextMenuStrip();
                 this.notifyIcon.ContextMenuStrip = this.contextMenu;
-                this.notifyIcon.Icon = new System.Drawing.Icon("res/VolumeKLogo.ico");
+                this.notifyIcon.Icon = new Icon("res/VolumeKLogo.ico");
                 this.notifyIcon.Text = "Volumek";
                 this.notifyIcon.Visible = true;
 
-                // Create the COM port selection dropdown
                 this.comPortComboBox = new ToolStripComboBox("Select COM Port");
                 this.contextMenu.Items.Add(this.comPortComboBox);
 
-                // Populate the COM port dropdown with available ports
                 string[] availablePorts = this.Controller.Communicator.GetPorts();
-
-                // ReSharper disable once CoVariantArrayConversion
                 this.comPortComboBox.Items.AddRange(availablePorts);
-
                 this.comPortComboBox.SelectedItem = this.Controller.Communicator.Port.ToUpper();
 
-                // Create the menu items
                 this.connectMenuItem = new ToolStripMenuItem(this.Controller!.Communicator.Running ? "Disconnect" : "Connect");
                 this.lightToggleMenuItem = new ToolStripMenuItem("Light");
                 this.lightToggleMenuItem.Checked = this.Controller.LightRgbwEffect.State;
                 this.exitMenuItem = new ToolStripMenuItem("Exit");
 
-                // Add the menu items to the context menu
                 this.contextMenu.Items.Add(this.connectMenuItem);
                 this.contextMenu.Items.Add(this.lightToggleMenuItem);
+
+                this.brightnessLabel = new Label();
+                this.brightnessLabel.Text = "Brightness:";
+                this.brightnessLabel.BackColor = Color.White;
+                this.brightnessLabel.ForeColor = Color.Black;
+                this.contextMenu.Items.Add(new ToolStripControlHost(this.brightnessLabel));
+
+                this.brightnessSlider = new TrackBar();
+                this.brightnessSlider.Minimum = 0;
+                this.brightnessSlider.Maximum = 255;
+                this.brightnessSlider.Value = this.Controller.LightRgbwEffect.Brightness;
+                this.brightnessSlider.TickStyle = TickStyle.None;
+                this.brightnessSlider.BackColor = Color.White;
+                this.brightnessSlider.Scroll += this.BrightnessSlider_Scroll!;
+                this.contextMenu.Items.Add(new ToolStripControlHost(this.brightnessSlider));
+
+                this.speedLabel = new Label();
+                this.speedLabel.Text = "Speed:";
+                this.speedLabel.BackColor = Color.White;
+                this.speedLabel.ForeColor = Color.Black;
+                this.contextMenu.Items.Add(new ToolStripControlHost(this.speedLabel));
+
+                this.speedSlider = new TrackBar();
+                this.speedSlider.Minimum = 0;
+                this.speedSlider.Maximum = 255;
+                this.speedSlider.Value = this.Controller.LightRgbwEffect.EffectSpeed;
+                this.speedSlider.TickStyle = TickStyle.None;
+                this.speedSlider.BackColor = Color.White;
+                this.speedSlider.Scroll += this.SpeedSlider_Scroll!;
+                this.contextMenu.Items.Add(new ToolStripControlHost(this.speedSlider));
+
                 this.contextMenu.Items.Add(this.exitMenuItem);
 
-                // Hook up event handlers
                 this.comPortComboBox.SelectedIndexChanged += this.ComPortComboBox_SelectedIndexChanged!;
                 this.connectMenuItem.Click += this.ConnectMenuItem_Click!;
                 this.exitMenuItem.Click += this.ExitMenuItem_Click!;
@@ -71,11 +99,9 @@ namespace VolumeKsharp
                 this.notifyIcon.Click += this.TrayIconOpened!;
                 Microsoft.Win32.SystemEvents.PowerModeChanged += this.OnPowerModeChanged;
 
-                // Start the message loop
                 Application.Run();
             })
             {
-                // Set the thread to run in the background and start it
                 IsBackground = true,
             };
 
@@ -84,7 +110,6 @@ namespace VolumeKsharp
 
         private void ComPortComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Get the selected COM port from the dropdown
             string selectedPort = this.comPortComboBox.SelectedItem.ToString() ?? string.Empty;
             var controller = this.Controller;
             if (controller is not null)
@@ -119,7 +144,6 @@ namespace VolumeKsharp
         {
             if (e.Mode == Microsoft.Win32.PowerModes.Resume)
             {
-                // Computer has resumed from sleep, restart serial communication
                 this.Controller!.Communicator.Stop();
                 this.Controller.Communicator.Start();
             }
@@ -132,17 +156,28 @@ namespace VolumeKsharp
             this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbwEffect);
         }
 
-        /// <summary>
-        /// Event handler for when the tray icon opens.
-        /// </summary>
+        private void BrightnessSlider_Scroll(object sender, EventArgs e)
+        {
+            TrackBar slider = (TrackBar)sender;
+            this.Controller!.LightRgbwEffect.Brightness = slider.Value;
+            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbwEffect);
+        }
+
+        private void SpeedSlider_Scroll(object sender, EventArgs e)
+        {
+            TrackBar slider = (TrackBar)sender;
+            this.Controller!.LightRgbwEffect.EffectSpeed = slider.Value;
+            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbwEffect);
+        }
+
         private void TrayIconOpened(object sender, EventArgs e)
         {
             this.lightToggleMenuItem.Checked = this.Controller!.LightRgbwEffect.State;
             string[] availablePorts = this.Controller.Communicator.GetPorts();
             this.comPortComboBox.Items.Clear();
-
-            // ReSharper disable once CoVariantArrayConversion
             this.comPortComboBox.Items.AddRange(availablePorts);
+            this.speedSlider.Value = this.Controller.LightRgbwEffect.EffectSpeed;
+            this.brightnessSlider.Value = this.Controller.LightRgbwEffect.Brightness;
         }
     }
 }
