@@ -11,10 +11,8 @@
 
     <ItemGroup>
       <AdditionalFiles Include="stylecop.json" />
-      <PackageReference Include="Bunifu.UI.WinForms" Version="6.1.0" />
       <PackageReference Include="MQTTnet" Version="4.2.1.781" />
       <PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.2.1.781" />
-      <PackageReference Include="MQTTnet.Extensions.WebSocket4Net" Version="4.2.1.781" />
       <PackageReference Include="NAudio" Version="2.1.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
       <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435">
