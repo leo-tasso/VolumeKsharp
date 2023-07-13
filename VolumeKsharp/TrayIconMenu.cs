@@ -160,14 +160,12 @@ namespace VolumeKsharp
         {
             TrackBar slider = (TrackBar)sender;
             this.Controller!.LightRgbwEffect.Brightness = slider.Value;
-            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbwEffect);
         }
 
         private void SpeedSlider_Scroll(object sender, EventArgs e)
         {
             TrackBar slider = (TrackBar)sender;
             this.Controller!.LightRgbwEffect.EffectSpeed = slider.Value;
-            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbwEffect);
         }
 
         private void TrayIconOpened(object sender, EventArgs e)
