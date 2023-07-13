@@ -150,6 +150,9 @@ public class LightRgbwEffect : ILightRgbwEffect, IEquatable<LightRgbwEffect>
                 case "Chase":
                     this.controller.Communicator.AddCommand(new ChaseAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, this.EffectSpeed));
                     break;
+                case "Rainbow":
+                    this.controller.Communicator.AddCommand(new RainbowAppearanceCommand(this.Brightness, this.EffectSpeed));
+                    break;
                 default:
                     this.SolidUpdate();
                     break;

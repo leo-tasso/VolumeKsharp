@@ -97,6 +97,10 @@ void loop() {
       brightness = incoming.substring(17, 20).toInt();
       lightSpeed = incoming.substring(21, 24).toInt();
       mode = 7;
+    } else if (incoming[0] == 'r') {
+      brightness = incoming.substring(1, 4).toInt();
+      lightSpeed = incoming.substring(5, 8).toInt();
+      mode = 5;
     } else mode = incoming.toInt();
   }
   CangeCol();
@@ -126,25 +130,15 @@ void fillWhite() {
 }
 
 void rainbow() {
-  static uint8_t hue;
-  if (mode == 5) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-      leds[i] = CHSV((i * 256 / NUM_LEDS) + hue, 255, 255);
-    }
-    FastLED.setBrightness(brightness);
-    FastLED.show();
-    hue++;
-  } else {
-    CangeCol();
+  static double hue;
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CHSV((i * 256 / NUM_LEDS) + (int)hue, 255, 255);
   }
+  FastLED.setBrightness(brightness);
+  FastLED.show();
+  hue += lightSpeed / 200.0;
 }
 
-
-void rainbowLoop() {
-  while (mode == 5) {
-    rainbow();
-  }
-}
 
 
 void breath() {
@@ -167,7 +161,16 @@ void chase() {
 }
 
 int chaseColor(int val, int num) {
-  return (val - ((val / NUM_LEDS * num) + (millis() * lightSpeed / 1000) % val));
+  if (val == 0) return 0;
+  int result = val - differencePosition(num) * 35;
+  if (result > 0) return result;
+  return 0;
+}
+
+int differencePosition(int pos) {
+  int diff = (((int)(millis() / 13000.0 * lightSpeed) % NUM_LEDS) - pos);
+  if (diff >= 0) return diff;
+  return diff + NUM_LEDS;
 }
 
 void progress() {
@@ -195,7 +198,7 @@ void CangeCol() {
       fillWhite();
       break;
     case 5:
-      rainbowLoop();
+      rainbow();
       break;
     case 6:
       breath();
