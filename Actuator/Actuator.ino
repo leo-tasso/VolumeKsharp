@@ -101,6 +101,14 @@ void loop() {
       brightness = incoming.substring(1, 4).toInt();
       lightSpeed = incoming.substring(5, 8).toInt();
       mode = 5;
+    } else if (incoming[0] == 'f') {
+      r = incoming.substring(1, 4).toInt();
+      g = incoming.substring(5, 8).toInt();
+      b = incoming.substring(9, 12).toInt();
+      w = incoming.substring(13, 16).toInt();
+      brightness = incoming.substring(17, 20).toInt();
+      lightSpeed = incoming.substring(21, 24).toInt();
+      mode = 2;
     } else mode = incoming.toInt();
   }
   CangeCol();
@@ -183,13 +191,23 @@ void progress() {
   FastLED.setBrightness(brightness);
   FastLED.show();
 }
+void flash() {
+  CRGBW color;
+  if ((int)(millis() / 10000.0 * lightSpeed) % 2 == 0) color = CRGBW(r, g, b, w);
+  else color = CRGBW(0, 0, 0, 0);
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = color;
+    FastLED.setBrightness(brightness);
+    FastLED.show();
+  }
+}
 void CangeCol() {
   switch (mode) {
     case 1:
       colorFill(CRGBW(r, g, b, w));
       break;
     case 2:
-      colorFill(CRGB::Green);
+      flash();
       break;
     case 3:
       colorFill(CRGB::Blue);
