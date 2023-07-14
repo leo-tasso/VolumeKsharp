@@ -140,24 +140,30 @@ public class LightRgbwEffect : ILightRgbwEffect, IEquatable<LightRgbwEffect>
     /// </summary>
     public void UpdateLight()
     {
+        this.UpdateLight(this.Brightness);
+    }
+
+    /// <inheritdoc />
+    public void UpdateLight(int brightness)
+    {
         if (this.State)
         {
             switch (this.ActiveEffect)
             {
                 case "Breath":
-                    this.controller.Communicator.AddCommand(new BreathAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, this.EffectSpeed));
+                    this.controller.Communicator.AddCommand(new BreathAppearanceCommand(this.R, this.G, this.B, this.W, brightness, this.EffectSpeed));
                     break;
                 case "Chase":
-                    this.controller.Communicator.AddCommand(new ChaseAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, this.EffectSpeed));
+                    this.controller.Communicator.AddCommand(new ChaseAppearanceCommand(this.R, this.G, this.B, this.W, brightness, this.EffectSpeed));
                     break;
                 case "Rainbow":
-                    this.controller.Communicator.AddCommand(new RainbowAppearanceCommand(this.Brightness, this.EffectSpeed));
+                    this.controller.Communicator.AddCommand(new RainbowAppearanceCommand(brightness, this.EffectSpeed));
                     break;
                 case "Flash":
-                    this.controller.Communicator.AddCommand(new FlashAppearanceCommand(this.R, this.G, this.B, this.W, this.Brightness, this.EffectSpeed));
+                    this.controller.Communicator.AddCommand(new FlashAppearanceCommand(this.R, this.G, this.B, this.W, brightness, this.EffectSpeed));
                     break;
                 default:
-                    this.SolidUpdate();
+                    this.SolidUpdate(brightness);
                     break;
             }
         }
@@ -165,6 +171,8 @@ public class LightRgbwEffect : ILightRgbwEffect, IEquatable<LightRgbwEffect>
         {
             this.controller.Communicator.AddCommand(new SolidAppearanceCommand(0, 0, 0, 0, 0));
         }
+
+        this.controller.RgbwLightMqttClient.UpdateState(this);
     }
 
     /// <inheritdoc cref="object" />
@@ -213,13 +221,19 @@ public class LightRgbwEffect : ILightRgbwEffect, IEquatable<LightRgbwEffect>
         return new LightRgbwEffect(this, this.controller);
     }
 
-    private void SolidUpdate()
+    private void SolidUpdate(int brightness)
     {
         this.controller.Communicator.AddCommand(new SolidAppearanceCommand(
             this.R,
             this.G,
             this.B,
             this.W,
-            this.Brightness));
+            brightness));
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private void SolidUpdate()
+    {
+        this.SolidUpdate(this.Brightness);
     }
 }

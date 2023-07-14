@@ -32,6 +32,12 @@ public interface ILight : ICloneable
     /// </summary>
     void UpdateLight();
 
+    /// <summary>
+    /// Method to update the physical light.
+    /// </summary>
+    /// <param name="brightness">The brightness value.</param>
+    void UpdateLight(int brightness);
+
     /// <inheritdoc cref="object" />
     bool Equals(LightRgbwEffect? other);
 

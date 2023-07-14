@@ -14,8 +14,9 @@ using VolumeKsharp.Light;
 /// <summary/> mode to show volume status on the ring.
 public class VolumeMode : IMode
 {
-    private const int ShowTime = 500;
-    private const double ChangeRate = 1;
+    private const float TransitionRate = 0.1f;
+    private const int ShowTime = 700;
+    private const double ChangeRate = 0.5;
     private const float StepSize = 2;
     private const double Tolerance = 1;
     private readonly Stopwatch sw = Stopwatch.StartNew();
@@ -23,21 +24,33 @@ public class VolumeMode : IMode
     private readonly Volume volume = new();
     private ILight lightRgbwOld;
     private double volumeShown;
-    private bool showing;
     private bool muted;
     private bool mutedOld;
+    private State activeState;
+    private State targetState;
+    private int transitionBrightness;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VolumeMode"/> class.
     /// </summary>
-    /// <param name="calligController">The controller father.</param>
-    public VolumeMode(Controller calligController)
+    /// <param name="callingController">The controller father.</param>
+    public VolumeMode(Controller callingController)
     {
-        this.CalligController = calligController;
-        this.lightRgbwOld = (calligController.LightRgbwEffect.Clone() as ILight)!;
+        this.CallingController = callingController;
+        this.lightRgbwOld = (callingController.LightRgbwEffect.Clone() as ILight)!;
+        this.activeState = State.VolumeState;
+        this.targetState = State.VolumeState;
+        this.transitionBrightness = callingController.LightRgbwEffect.Brightness;
     }
 
-    private Controller CalligController { get; set; }
+    private enum State
+    {
+        LightState,
+        MuteState,
+        VolumeState,
+    }
+
+    private Controller CallingController { get; set; }
 
     /// <inheritdoc/>
     public bool IncomingCommands(InputCommands command)
@@ -69,7 +82,7 @@ public class VolumeMode : IMode
 
         if (this.swMuted.ElapsedMilliseconds > ShowTime)
         {
-            this.ShowVolume();
+            this.targetState = State.VolumeState;
         }
 
         return true;
@@ -78,17 +91,7 @@ public class VolumeMode : IMode
     /// <inheritdoc/>
     public Task Compute()
     {
-        if (!this.lightRgbwOld.Equals(this.CalligController.LightRgbwEffect))
-        {
-            this.CalligController.RgbwLightMqttClient.UpdateState(this.CalligController.LightRgbwEffect);
-            if (!this.showing)
-            {
-                this.CalligController.LightRgbwEffect.UpdateLight();
-            }
-
-            this.lightRgbwOld = (this.CalligController.LightRgbwEffect.Clone() as ILight)!;
-        }
-
+// Section to set the target state.
         // Stops clocks to avoid overflows.
         if (this.swMuted is { ElapsedMilliseconds: > ShowTime, IsRunning: true })
         {
@@ -105,37 +108,121 @@ public class VolumeMode : IMode
         {
             if (Math.Abs(this.volume.GetVolume() - this.volumeShown) > Tolerance)
             {
-                this.ShowVolume();
+                this.sw.Restart();
+                this.targetState = State.VolumeState;
             }
         }
 
         // Show mute status change.
         if (this.mutedOld != this.muted)
         {
-            if (this.muted)
-            {
-                this.CalligController.Communicator.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0, this.CalligController.LightRgbwEffect.Brightness < 20 ? 20 : this.CalligController.LightRgbwEffect.Brightness));
-                this.showing = true;
-            }
-            else
-            {
-                this.ShowVolume();
-            }
+            this.targetState = this.muted ? State.MuteState : State.VolumeState;
         }
 
         // Turn off after having shown the volume.
-        if (this.sw.ElapsedMilliseconds > ShowTime && this.showing)
+        if (this.sw.ElapsedMilliseconds > ShowTime && this.targetState != State.LightState)
         {
-            this.CalligController.LightRgbwEffect.UpdateLight();
-            this.showing = false;
+            this.targetState = State.LightState;
+        }
+
+// Section to update the light.
+        if (this.targetState == this.activeState)
+        {
+            if (this.transitionBrightness >= this.CallingController.LightRgbwEffect.Brightness)
+            {
+                // Update light on change.
+                if (!this.lightRgbwOld.Equals(this.CallingController.LightRgbwEffect) && this.activeState == State.LightState)
+                {
+                    this.CallingController.LightRgbwEffect.UpdateLight();
+                    this.transitionBrightness = this.CallingController.LightRgbwEffect.Brightness;
+                    this.lightRgbwOld = (this.CallingController.LightRgbwEffect.Clone() as ILight)!;
+                }
+                else if (this.activeState == State.VolumeState)
+                {
+                    this.UpdateVolumeState();
+                }
+            }
+            else
+            {
+                this.transitionBrightness += (int)(this.CallingController.LightRgbwEffect.Brightness * TransitionRate);
+                if (this.transitionBrightness > this.CallingController.LightRgbwEffect.Brightness)
+                {
+                    this.transitionBrightness = this.CallingController.LightRgbwEffect.Brightness;
+                }
+
+                switch (this.activeState)
+                {
+                    case State.LightState:
+                        this.UpdateLightState();
+                        break;
+                    case State.MuteState:
+                        this.UpdateMuteState();
+                        break;
+                    case State.VolumeState:
+                        this.UpdateVolumeState();
+                        break;
+                }
+            }
+        }
+        else
+        {
+            if (this.activeState == State.LightState && !this.CallingController.LightRgbwEffect.State)
+            {
+                this.transitionBrightness = 0;
+            }
+
+            this.transitionBrightness -= (int)(this.CallingController.LightRgbwEffect.Brightness * TransitionRate);
+            if (this.transitionBrightness < 0)
+            {
+                this.transitionBrightness = 0;
+            }
+
+            switch (this.activeState)
+            {
+                case State.LightState:
+                    this.UpdateLightState();
+                    break;
+                case State.MuteState:
+                    this.UpdateMuteState();
+                    break;
+                case State.VolumeState:
+                    this.UpdateVolumeState();
+                    break;
+            }
+
+            if (this.transitionBrightness <= 0)
+            {
+                this.activeState = this.targetState;
+            }
         }
 
         return Task.CompletedTask;
     }
 
-    private void ShowVolume()
+    private void UpdateMuteState()
     {
-        this.sw.Restart();
+        int brightness;
+        if (this.transitionBrightness == this.CallingController.LightRgbwEffect.Brightness)
+        {
+            brightness = this.CallingController.LightRgbwEffect.Brightness < 20
+                ? 20
+                : this.CallingController.LightRgbwEffect.Brightness;
+        }
+        else
+        {
+            brightness = this.transitionBrightness;
+        }
+
+        this.CallingController.Communicator.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0, brightness));
+    }
+
+    private void UpdateLightState()
+    {
+        this.CallingController.LightRgbwEffect.UpdateLight(this.transitionBrightness);
+    }
+
+    private void UpdateVolumeState()
+    {
         if (this.volumeShown < this.volume.GetVolume())
         {
             this.volumeShown += ChangeRate;
@@ -145,7 +232,18 @@ public class VolumeMode : IMode
             this.volumeShown -= ChangeRate;
         }
 
-        this.CalligController.Communicator.AddCommand(new PercentageAppearanceCommand(0, this.CalligController.LightRgbwEffect.MaxValue, 0, 0, this.CalligController.LightRgbwEffect.Brightness < 20 ? 20 : this.CalligController.LightRgbwEffect.Brightness, Convert.ToSingle(this.volumeShown)));
-        this.showing = true;
+        int brightness;
+        if (this.transitionBrightness == this.CallingController.LightRgbwEffect.Brightness)
+        {
+            brightness = this.CallingController.LightRgbwEffect.Brightness < 20
+                ? 20
+                : this.CallingController.LightRgbwEffect.Brightness;
+        }
+        else
+        {
+            brightness = this.transitionBrightness;
+        }
+
+        this.CallingController.Communicator.AddCommand(new PercentageAppearanceCommand(0, this.CallingController.LightRgbwEffect.MaxValue, 0, 0, brightness, Convert.ToSingle(this.volumeShown)));
     }
 }
