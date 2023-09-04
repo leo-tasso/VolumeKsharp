@@ -15,7 +15,8 @@ public class VolumeMode : IMode
 {
     private const float TransitionRate = 0.1f;
     private const int ShowTime = 700;
-    private const double ChangeRate = 0.5;
+    private const double BaseChangeRate = 0.5;
+    private const double ChangeRate = 2;
     private const float StepSize = 2;
     private const double Tolerance = 1;
     private readonly Stopwatch sw = Stopwatch.StartNew();
@@ -222,13 +223,18 @@ public class VolumeMode : IMode
 
     private void UpdateVolumeState()
     {
-        if (this.volumeShown < this.volume.GetVolume())
+        if (Math.Abs(this.volumeShown - this.volume.GetVolume()) > StepSize / 4)
         {
-            this.volumeShown += ChangeRate;
-        }
-        else if (this.volumeShown > this.volume.GetVolume())
-        {
-            this.volumeShown -= ChangeRate;
+            double changeRate = BaseChangeRate;
+            changeRate *= Math.Abs(this.volumeShown - this.volume.GetVolume()) / ChangeRate;
+            if (this.volumeShown < this.volume.GetVolume())
+            {
+                this.volumeShown += changeRate;
+            }
+            else if (this.volumeShown > this.volume.GetVolume())
+            {
+                this.volumeShown -= changeRate;
+            }
         }
 
         int brightness;
