@@ -19,12 +19,19 @@ public class VolumeMode : IMode
     private const double ChangeRate = 2;
     private const float StepSize = 2;
     private const double Tolerance = 1;
+
+    /// <summary>
+    /// Timer to track the elapsed time since the last volume change shown.
+    /// </summary>
     private readonly Stopwatch sw = Stopwatch.StartNew();
+
+    /// <summary>
+    /// Timer to track the elapsed time since the last mute state change shown.
+    /// </summary>
     private readonly Stopwatch swMuted = Stopwatch.StartNew();
     private readonly Volume volume = new();
     private ILight lightRgbwOld;
     private double volumeShown;
-    private bool muted;
     private bool mutedOld;
     private State activeState;
     private State targetState;
@@ -43,6 +50,12 @@ public class VolumeMode : IMode
         this.transitionBrightness = callingController.LightRgbwEffect.Brightness;
     }
 
+/// <summary>
+/// All the states of the light:
+/// Light>Showing selected light state
+/// MuteState>Showing if just muted or unmuted
+/// VolumeState>Showing if volume just changed.
+/// </summary>
     private enum State
     {
         LightState,
@@ -50,13 +63,15 @@ public class VolumeMode : IMode
         VolumeState,
     }
 
+/// <summary>
+/// Gets or sets the calling controller.
+/// </summary>
     private Controller CallingController { get; set; }
 
     /// <inheritdoc/>
     public bool IncomingCommands(InputCommands command)
     {
         this.sw.Restart();
-        this.mutedOld = this.muted;
         switch (command)
         {
             case InputCommands.Minus:
@@ -68,9 +83,7 @@ public class VolumeMode : IMode
                 break;
 
             case InputCommands.Press:
-                this.muted = !this.muted;
-                this.volume.Muted = this.muted;
-                this.swMuted.Restart();
+                this.volume.Muted = !this.volume.Muted;
                 break;
 
             case InputCommands.Release:
@@ -78,11 +91,6 @@ public class VolumeMode : IMode
 
             default:
                 throw new ArgumentOutOfRangeException();
-        }
-
-        if (this.swMuted.ElapsedMilliseconds > ShowTime)
-        {
-            this.targetState = State.VolumeState;
         }
 
         return true;
@@ -104,7 +112,7 @@ public class VolumeMode : IMode
         }
 
         // If not showing muted, show volume status.
-        if (this.swMuted.ElapsedMilliseconds > ShowTime)
+        if (!this.swMuted.IsRunning)
         {
             if (Math.Abs(this.volume.GetVolume() - this.volumeShown) > Tolerance)
             {
@@ -114,9 +122,12 @@ public class VolumeMode : IMode
         }
 
         // Show mute status change.
-        if (this.mutedOld != this.muted)
+        if (this.mutedOld != this.volume.Muted)
         {
-            this.targetState = this.muted ? State.MuteState : State.VolumeState;
+            this.targetState = this.volume.Muted ? State.MuteState : State.VolumeState;
+            this.mutedOld = this.volume.Muted;
+            this.sw.Restart();
+            this.swMuted.Restart();
         }
 
         // Turn off after having shown the volume.
@@ -126,11 +137,13 @@ public class VolumeMode : IMode
         }
 
 // Section to update the light.
+        // If The active state is the same as the target state, update it's properties.
         if (this.targetState == this.activeState)
         {
+            // If the final brightness is reached.
             if (this.transitionBrightness >= this.CallingController.LightRgbwEffect.Brightness)
             {
-                // Update light on change.
+                // Update light class only on change.
                 if (!this.lightRgbwOld.Equals(this.CallingController.LightRgbwEffect) && this.activeState == State.LightState)
                 {
                     this.CallingController.LightRgbwEffect.UpdateLight();
@@ -142,54 +155,25 @@ public class VolumeMode : IMode
                     this.UpdateVolumeState();
                 }
             }
+
+            // If the final brightness is not reached yet.
             else
             {
-                this.transitionBrightness += (int)(this.CallingController.LightRgbwEffect.Brightness * TransitionRate);
-                if (this.transitionBrightness > this.CallingController.LightRgbwEffect.Brightness)
-                {
-                    this.transitionBrightness = this.CallingController.LightRgbwEffect.Brightness;
-                }
-
-                switch (this.activeState)
-                {
-                    case State.LightState:
-                        this.UpdateLightState();
-                        break;
-                    case State.MuteState:
-                        this.UpdateMuteState();
-                        break;
-                    case State.VolumeState:
-                        this.UpdateVolumeState();
-                        break;
-                }
+                this.UpdateTransition();
             }
-        }
+        }// If the active state is different from the target state, transition to it.
         else
         {
+            // If the active state is light and the light is off, no need to fade out, it's already off.
             if (this.activeState == State.LightState && !this.CallingController.LightRgbwEffect.State)
             {
                 this.transitionBrightness = 0;
             }
 
-            this.transitionBrightness -= (int)(this.CallingController.LightRgbwEffect.Brightness * TransitionRate);
-            if (this.transitionBrightness < 0)
-            {
-                this.transitionBrightness = 0;
-            }
+            // Fade out active state.
+            this.UpdateTransition();
 
-            switch (this.activeState)
-            {
-                case State.LightState:
-                    this.UpdateLightState();
-                    break;
-                case State.MuteState:
-                    this.UpdateMuteState();
-                    break;
-                case State.VolumeState:
-                    this.UpdateVolumeState();
-                    break;
-            }
-
+            // If reached limit of fadeout, change state.
             if (this.transitionBrightness <= 0)
             {
                 this.activeState = this.targetState;
@@ -197,6 +181,46 @@ public class VolumeMode : IMode
         }
 
         return Task.CompletedTask;
+    }
+
+    private void UpdateTransition()
+    {
+        // Update transitionBrightness.
+        if (this.targetState == this.activeState)
+        {
+            this.transitionBrightness += (int)(this.CallingController.LightRgbwEffect.Brightness * TransitionRate);
+        }
+        else
+        {
+            this.transitionBrightness -= (int)(this.CallingController.LightRgbwEffect.Brightness * TransitionRate);
+        }
+
+        // Limit the max and min value to the target.
+        if (this.transitionBrightness > this.CallingController.LightRgbwEffect.Brightness)
+        {
+            this.transitionBrightness = this.CallingController.LightRgbwEffect.Brightness;
+        }
+
+        if (this.transitionBrightness < 0)
+        {
+            this.transitionBrightness = 0;
+        }
+
+        // After updating the new brightness update the state.
+        switch (this.activeState)
+        {
+            case State.LightState:
+                this.UpdateLightState();
+                break;
+            case State.MuteState:
+                this.UpdateMuteState();
+                break;
+            case State.VolumeState:
+                this.UpdateVolumeState();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
     }
 
     private void UpdateMuteState()

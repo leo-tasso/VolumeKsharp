@@ -16,10 +16,11 @@ public class Volume
     private readonly MMDevice device = Enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
 
     /// <summary>
-    /// Sets a value indicating whether the audio is muted.
+    /// Gets or sets a value indicating whether the audio is muted.
     /// </summary>
     public bool Muted
     {
+        get => this.device.AudioEndpointVolume.Mute;
         set => this.device.AudioEndpointVolume.Mute = value;
     }
 
