@@ -54,31 +54,14 @@ class FlashAppearanceCommand {
 }
 IAppearanceCommand <|-- FlashAppearanceCommand
 interface IAppearanceCommand {
-    Message : string? <<get>>
 }
 interface ILight {
-    MaxValue : int <<get>>
-    Brightness : int <<get>> <<set>>
-    State : bool <<get>> <<set>>
-    UpdateLight() : void
-    UpdateLight(brightness:int) : void
-    Equals(other:LightRgbwEffect?) : bool
-    Equals(obj:object?) : bool
-    GetHashCode() : int
 }
 ICloneable <|-- ILight
 interface ILightEffect {
-    ActiveEffect : string? <<get>> <<set>>
-    EffectSpeed : int <<get>> <<set>>
-}
-class "ISet`1"<T> {
 }
 ILight <|-- ILightEffect
-ILightEffect --> "EffectsSet<string>" "ISet`1"
 interface ILightRgb {
-    R : int <<get>> <<set>>
-    G : int <<get>> <<set>>
-    B : int <<get>> <<set>>
 }
 ILight <|-- ILightRgb
 class LightRgbwEffect {
@@ -115,16 +98,9 @@ interface ILightRgbwEffect {
 ILightRgbw <|-- ILightRgbwEffect
 ILightEffect <|-- ILightRgbwEffect
 interface ILightRgbw {
-    W : int <<get>> <<set>>
 }
 ILightRgb <|-- ILightRgbw
 interface ICommunicator {
-    Port : string <<get>> <<set>>
-    Running : bool <<get>> <<set>>
-    Start() : void
-    GetPorts() : string[]
-    AddCommand(command:IAppearanceCommand) : void
-    Stop() : bool
 }
 class SerialCom {
     + SerialCom(controller:Controller)

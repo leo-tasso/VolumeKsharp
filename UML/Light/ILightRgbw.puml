@@ -1,6 +1,5 @@
 @startuml
 interface ILightRgbw {
-    W : int <<get>> <<set>>
 }
 ILightRgb <|-- ILightRgbw
 @enduml
