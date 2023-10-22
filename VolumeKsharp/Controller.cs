@@ -50,7 +50,7 @@ public class Controller
     /// </summary>
     public bool Continue { get; set; }
 
-    private IMode? Mode { get; set; }
+    private Mode.Mode? LastMode { get; set; }
 
     /// <summary>
     /// Method used externally to add commands.
@@ -61,17 +61,24 @@ public class Controller
         InputCommandsQueue.Enqueue(command);
     }
 
+    private void AddMode(Mode.Mode newMode)
+    {
+        this.LastMode?.StackMode(newMode);
+        this.LastMode = newMode;
+    }
+
     private void Update()
     {
-        this.Mode = new VolumeMode(this);
+        this.AddMode(new MqttLight(this));
+        this.AddMode(new VolumeMode(this));
         while (this.Continue)
         {
             if (InputCommandsQueue.Count > 0)
             {
-                this.Mode.IncomingCommands(InputCommandsQueue.Dequeue());
+                this.LastMode?.IncomingCommands(InputCommandsQueue.Dequeue());
             }
 
-            this.Mode.Compute();
+            this.LastMode?.Compute();
             Thread.Sleep(10);
         }
     }

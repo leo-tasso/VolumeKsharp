@@ -8,10 +8,9 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using VolumeKsharp.AppearanceCommands;
-using VolumeKsharp.Light;
 
 /// <summary/> mode to show volume status on the ring.
-public class VolumeMode : IMode
+public class VolumeMode : Mode
 {
     private const float TransitionRate = 0.1f;
     private const int ShowTime = 700;
@@ -30,7 +29,6 @@ public class VolumeMode : IMode
     /// </summary>
     private readonly Stopwatch swMuted = Stopwatch.StartNew();
     private readonly Volume volume = new();
-    private ILight lightRgbwOld;
     private double volumeShown;
     private bool mutedOld;
     private State activeState;
@@ -44,7 +42,6 @@ public class VolumeMode : IMode
     public VolumeMode(Controller callingController)
     {
         this.CallingController = callingController;
-        this.lightRgbwOld = (callingController.LightRgbwEffect.Clone() as ILight)!;
         this.activeState = State.VolumeState;
         this.targetState = State.VolumeState;
         this.transitionBrightness = callingController.LightRgbwEffect.Brightness;
@@ -58,18 +55,30 @@ public class VolumeMode : IMode
 /// </summary>
     private enum State
     {
-        LightState,
+        Other,
         MuteState,
         VolumeState,
     }
+
+/// <inheritdoc />
+    protected override bool IsActive => this.activeState != State.Other;
+
+/// <inheritdoc />
+    protected override bool RequiresShow => this.targetState != State.Other;
+
+/// <inheritdoc />
+    protected override Mode? PrevMode { get; set; }
+
+/// <inheritdoc />
+    protected override Mode? NextMode { get; set; }
 
 /// <summary>
 /// Gets or sets the calling controller.
 /// </summary>
     private Controller CallingController { get; set; }
 
-    /// <inheritdoc/>
-    public bool IncomingCommands(InputCommands command)
+/// <inheritdoc/>
+    public override void IncomingCommands(InputCommands command)
     {
         this.sw.Restart();
         switch (command)
@@ -93,11 +102,11 @@ public class VolumeMode : IMode
                 throw new ArgumentOutOfRangeException();
         }
 
-        return true;
+        this.PrevMode?.IncomingCommands(command);
     }
 
     /// <inheritdoc/>
-    public Task Compute()
+    public override Task Compute()
     {
 // Section to set the target state.
         // Stops clocks to avoid overflows.
@@ -131,9 +140,9 @@ public class VolumeMode : IMode
         }
 
         // Turn off after having shown the volume.
-        if (this.sw.ElapsedMilliseconds > ShowTime && this.targetState != State.LightState)
+        if (this.HigherPriorityRequired() || (this.sw.ElapsedMilliseconds > ShowTime && this.targetState != State.Other))
         {
-            this.targetState = State.LightState;
+            this.targetState = State.Other;
         }
 
 // Section to update the light.
@@ -143,14 +152,7 @@ public class VolumeMode : IMode
             // If the final brightness is reached.
             if (this.transitionBrightness >= this.CallingController.LightRgbwEffect.Brightness)
             {
-                // Update light class only on change.
-                if (!this.lightRgbwOld.Equals(this.CallingController.LightRgbwEffect) && this.activeState == State.LightState)
-                {
-                    this.CallingController.LightRgbwEffect.UpdateLight();
-                    this.transitionBrightness = this.CallingController.LightRgbwEffect.Brightness;
-                    this.lightRgbwOld = (this.CallingController.LightRgbwEffect.Clone() as ILight)!;
-                }
-                else if (this.activeState == State.VolumeState)
+                if (this.activeState == State.VolumeState)
                 {
                     this.UpdateVolumeState();
                 }
@@ -159,34 +161,35 @@ public class VolumeMode : IMode
             // If the final brightness is not reached yet.
             else
             {
-                this.UpdateTransition();
+                if (!this.AnyOtherIsShowing())
+                {
+                    this.UpdateTransition();
+                }
             }
         }// If the active state is different from the target state, transition to it.
         else
         {
-            // If the active state is light and the light is off, no need to fade out, it's already off.
-            if (this.activeState == State.LightState && !this.CallingController.LightRgbwEffect.State)
-            {
-                this.transitionBrightness = 0;
-            }
-
             // Fade out active state.
-            this.UpdateTransition();
-
-            // If reached limit of fadeout, change state.
-            if (this.transitionBrightness <= 0)
+            if (!this.AnyOtherIsShowing())
             {
-                this.activeState = this.targetState;
+                this.UpdateTransition();
+
+                // If reached limit of fadeout, change state.
+                if (this.transitionBrightness <= 0)
+                {
+                    this.activeState = this.targetState;
+                }
             }
         }
 
+        this.PrevMode?.Compute();
         return Task.CompletedTask;
     }
 
     private void UpdateTransition()
     {
         // Update transitionBrightness.
-        if (this.targetState == this.activeState)
+        if (this.targetState == this.activeState && this.activeState != State.Other)
         {
             this.transitionBrightness += (int)(this.CallingController.LightRgbwEffect.Brightness * TransitionRate);
         }
@@ -209,8 +212,7 @@ public class VolumeMode : IMode
         // After updating the new brightness update the state.
         switch (this.activeState)
         {
-            case State.LightState:
-                this.UpdateLightState();
+            case State.Other:
                 break;
             case State.MuteState:
                 this.UpdateMuteState();
@@ -238,11 +240,6 @@ public class VolumeMode : IMode
         }
 
         this.CallingController.Communicator.AddCommand(new SolidAppearanceCommand(255, 0, 0, 0, brightness));
-    }
-
-    private void UpdateLightState()
-    {
-        this.CallingController.LightRgbwEffect.UpdateLight(this.transitionBrightness);
     }
 
     private void UpdateVolumeState()
