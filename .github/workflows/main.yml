@@ -19,7 +19,7 @@ jobs:
         sudo apt-get install -y plantuml
 
     - name: Generate Class Diagram
-      run: plantuml -o diagrams -tsvg **/*.cs
+      run: plantuml -o diagrams -tsvg VolumeKsharp/**/*.cs
 
     - name: Commit Diagram to Repository
       run: |
