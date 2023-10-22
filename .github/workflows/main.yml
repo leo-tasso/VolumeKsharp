@@ -1,4 +1,4 @@
-name: Generate UML Diagrams
+name: Generate UML Diagram
 
 on:
   push:
@@ -6,25 +6,28 @@ on:
       - master
 
 jobs:
-  generate_uml:
+  generate-uml:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v7
-        with:
-          dotnet-version: '7'  # or the version you are using
+    - name: Install PlantUML
+      run: |
+        sudo apt-get install -y graphviz
+        dotnet tool install --global PlantUML.Tool
+        echo 'export PATH="$HOME/.dotnet/tools:$PATH"' >> $HOME/.bashrc
+        source $HOME/.bashrc
 
-      - name: Install PlantUML
-        run: |
-          sudo apt-get install -y graphviz
-          wget https://sourceforge.net/projects/plantuml/files/plantuml.jar/download -O plantuml.jar
+    - name: Generate UML Diagram
+      run: |
+        plantuml -version
+        dotnet build -c Release
+        dotnet plantuml
 
-      - name: Generate UML Diagrams
-        run: |
-          dotnet build
-          java -jar plantuml.jar -r **/*.cs
-        working-directory: ${{ github.workspace }}
+    - name: Upload Diagram
+      uses: actions/upload-artifact@v2
+      with:
+        name: uml-diagram
+        path: '**/*.png'
