@@ -1,34 +1,30 @@
-name: Generate Class Diagram
+name: Generate UML Diagrams
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
-  build:
+  generate_uml:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-    - name: Install PlantUML
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y plantuml
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '7'  # or the version you are using
 
-    - name: Generate Class Diagram
-      run: plantuml -o diagrams -tsvg test/**/*.cs
+      - name: Install PlantUML
+        run: |
+          sudo apt-get install -y graphviz
+          wget https://sourceforge.net/projects/plantuml/files/plantuml.jar/download -O plantuml.jar
 
-    - name: Commit Diagram to Repository
-      run: |
-        git config --global user.email "tassinari.leonardo.2000@gmail.com"
-        git config --global user.name "Leonardo Tassinari"
-        git add diagrams/*.svg
-        git commit -m "Add class diagram"
-
-    - name: Push Changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate UML Diagrams
+        run: |
+          dotnet build
+          java -jar plantuml.jar -r **/*.cs
+        working-directory: ${{ github.workspace }}
