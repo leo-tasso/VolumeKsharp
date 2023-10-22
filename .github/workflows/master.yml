@@ -60,6 +60,7 @@ jobs:
         run: |
           git config --local user.email "tassinari.leonardo.2000@gmail.com"
           git config --local user.name "Leonardo Tassinari"
+          git diff --exit-code || exit 0  # Exit if there are no changes
           git add .
           git commit -m "Generate UML (${{ github.workflow }})"
           git push origin HEAD:master
