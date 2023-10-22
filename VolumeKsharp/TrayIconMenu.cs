@@ -152,7 +152,6 @@ namespace VolumeKsharp
         {
             this.lightToggleMenuItem.Checked = !this.lightToggleMenuItem.Checked;
             this.Controller!.LightRgbwEffect.State = this.lightToggleMenuItem.Checked;
-            this.Controller.RgbwLightMqttClient.UpdateState(this.Controller.LightRgbwEffect);
         }
 
         private void BrightnessSlider_Scroll(object sender, EventArgs e)

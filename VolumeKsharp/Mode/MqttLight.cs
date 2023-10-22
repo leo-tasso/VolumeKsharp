@@ -30,6 +30,7 @@ public class MqttLight : Mode
         this.lightRgbwOld = ((ILightRgbwEffect?)callingController.LightRgbwEffect.Clone())!;
         this.activeState = State.Other;
         this.targetState = State.Other;
+        this.RgbwLightMqttClient = new RgbwLightMqttClient("192.168.1.26", 1883, "volumeK", "homeassistant/light/volumeK", this.CallingController.LightRgbwEffect);
     }
 
     private enum State
@@ -37,6 +38,11 @@ public class MqttLight : Mode
         LightState,
         Other,
     }
+
+    /// <summary>
+    /// Gets or sets the mqtt api.
+    /// </summary>
+    public RgbwLightMqttClient RgbwLightMqttClient { get; set; }
 
     /// <inheritdoc />
     protected override bool IsActive => this.activeState == State.LightState;
@@ -82,7 +88,7 @@ public class MqttLight : Mode
                 // If not in a transition update light class only on change.
                 if (!this.lightRgbwOld.Equals(this.CallingController.LightRgbwEffect))
                 {
-                    this.CallingController.LightRgbwEffect.UpdateLight();
+                    this.UpdateLightState();
                     this.lightRgbwOld = (this.CallingController.LightRgbwEffect.Clone() as ILightRgbwEffect)!;
                 }
             }
@@ -112,6 +118,7 @@ public class MqttLight : Mode
     private void UpdateLightState()
     {
         this.CallingController.LightRgbwEffect.UpdateLight(this.transitionBrightness);
+        this.RgbwLightMqttClient.UpdateState(this.CallingController.LightRgbwEffect);
     }
 
     private void UpdateTransition()
@@ -137,9 +144,8 @@ public class MqttLight : Mode
             this.transitionBrightness = 0;
         }
 
-        if (this.targetState == this.activeState && this.activeState != State.Other)
+        if (this.targetState != this.activeState || this.activeState != State.Other)
         {
-            // After updating the new brightness update the state.
             this.UpdateLightState();
         }
     }

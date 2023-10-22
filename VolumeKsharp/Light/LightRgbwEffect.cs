@@ -170,8 +170,6 @@ public class LightRgbwEffect : ILightRgbwEffect, IEquatable<LightRgbwEffect>
         {
             this.controller.Communicator.AddCommand(new SolidAppearanceCommand(0, 0, 0, 0, 0));
         }
-
-        this.controller.RgbwLightMqttClient.UpdateState(this);
     }
 
     /// <inheritdoc cref="object" />
