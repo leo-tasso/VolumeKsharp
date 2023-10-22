@@ -14,7 +14,9 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install PlantUML
-      uses: chrispat/plantuml-action@v1
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y plantuml
 
     - name: Generate Class Diagram
       run: plantuml -o diagrams -tsvg VolumeKsharp/**/*.cs
