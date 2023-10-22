@@ -1,0 +1,7 @@
+@startuml
+class ChaseAppearanceCommand {
+    + ChaseAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int, speed:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- ChaseAppearanceCommand
+@enduml

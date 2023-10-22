@@ -1,0 +1,13 @@
+@startuml
+interface ILight {
+    MaxValue : int <<get>>
+    Brightness : int <<get>> <<set>>
+    State : bool <<get>> <<set>>
+    UpdateLight() : void
+    UpdateLight(brightness:int) : void
+    Equals(other:LightRgbwEffect?) : bool
+    Equals(obj:object?) : bool
+    GetHashCode() : int
+}
+ICloneable <|-- ILight
+@enduml

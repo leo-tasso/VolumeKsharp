@@ -1,0 +1,5 @@
+@startuml
+interface IAppearanceCommand {
+    Message : string? <<get>>
+}
+@enduml

@@ -1,0 +1,8 @@
+@startuml
+interface ILightRgb {
+    R : int <<get>> <<set>>
+    G : int <<get>> <<set>>
+    B : int <<get>> <<set>>
+}
+ILight <|-- ILightRgb
+@enduml

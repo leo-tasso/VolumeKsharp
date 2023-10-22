@@ -1,0 +1,10 @@
+@startuml
+interface ICommunicator {
+    Port : string <<get>> <<set>>
+    Running : bool <<get>> <<set>>
+    Start() : void
+    GetPorts() : string[]
+    AddCommand(command:IAppearanceCommand) : void
+    Stop() : bool
+}
+@enduml

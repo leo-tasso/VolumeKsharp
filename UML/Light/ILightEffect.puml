@@ -1,0 +1,10 @@
+@startuml
+interface ILightEffect {
+    ActiveEffect : string? <<get>> <<set>>
+    EffectSpeed : int <<get>> <<set>>
+}
+class "ISet`1"<T> {
+}
+ILight <|-- ILightEffect
+ILightEffect --> "EffectsSet<string>" "ISet`1"
+@enduml

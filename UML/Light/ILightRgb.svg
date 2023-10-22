@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="213px" preserveAspectRatio="none" style="width:136px;height:213px;" version="1.1" viewBox="0 0 136 213" width="136px" zoomAndPan="magnify"><defs><filter height="300%" id="f1sw2qcor61zyc" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[cbd08a60f16d53d37fa1e73fa9d04003]
+class ILightRgb--><rect fill="#FEFECE" filter="url(#f1sw2qcor61zyc)" height="86.4141" id="ILightRgb" style="stroke: #A80036; stroke-width: 1.5;" width="119" x="6" y="116"/><ellipse cx="33.6" cy="132" fill="#B4A7E5" rx="11" ry="11" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M29.5219,127.7656 L29.5219,125.6094 L36.9125,125.6094 L36.9125,127.7656 L34.4438,127.7656 L34.4438,135.8438 L36.9125,135.8438 L36.9125,138 L29.5219,138 L29.5219,135.8438 L31.9906,135.8438 L31.9906,127.7656 L29.5219,127.7656 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="59" x="50.4" y="136.1543">ILightRgb</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="124" y1="148" y2="148"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="105" x="12" y="162.2104">R : int «get» «set»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="107" x="12" y="175.0151">G : int «get» «set»</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="106" x="12" y="187.8198">B : int «get» «set»</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="124" y1="194.4141" y2="194.4141"/><!--MD5=[fd864ccf002c8b0f41664ff342654946]
+class ILight--><rect fill="#FEFECE" filter="url(#f1sw2qcor61zyc)" height="48" id="ILight" style="stroke: #A80036; stroke-width: 1.5;" width="65" x="33" y="8"/><ellipse cx="48" cy="24" fill="#ADD1B2" rx="11" ry="11" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M50.9688,29.6406 Q50.3906,29.9375 49.75,30.0781 Q49.1094,30.2344 48.4063,30.2344 Q45.9063,30.2344 44.5781,28.5938 Q43.2656,26.9375 43.2656,23.8125 Q43.2656,20.6875 44.5781,19.0313 Q45.9063,17.375 48.4063,17.375 Q49.1094,17.375 49.75,17.5313 Q50.4063,17.6875 50.9688,17.9844 L50.9688,20.7031 Q50.3438,20.125 49.75,19.8594 Q49.1563,19.5781 48.5313,19.5781 Q47.1875,19.5781 46.5,20.6563 Q45.8125,21.7188 45.8125,23.8125 Q45.8125,25.9063 46.5,26.9844 Q47.1875,28.0469 48.5313,28.0469 Q49.1563,28.0469 49.75,27.7813 Q50.3438,27.5 50.9688,26.9219 L50.9688,29.6406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="33" x="62" y="28.1543">ILight</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="34" x2="97" y1="40" y2="40"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="34" x2="97" y1="48" y2="48"/><!--MD5=[1d788c3d0dde247a423035639334691f]
+reverse link ILight to ILightRgb--><path d="M65.5,76.27 C65.5,89.12 65.5,103.17 65.5,115.94 " fill="none" id="ILight&lt;-ILightRgb" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="58.5,76.22,65.5,56.22,72.5,76.22,58.5,76.22" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[e0299543c4fd98f1a9720dcfa89c8f33]
+@startuml
+interface ILightRgb {
+    R : int <<get>> <<set>>
+    G : int <<get>> <<set>>
+    B : int <<get>> <<set>>
+}
+ILight <|- - ILightRgb
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 GMT 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 11.0.9+11-Ubuntu-0ubuntu1
+Operating System: Linux
+Default Encoding: ANSI_X3.4-1968
+Language: en
+Country: US
+--></g></svg>

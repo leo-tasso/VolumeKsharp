@@ -1,0 +1,6 @@
+@startuml
+interface ILightRgbwEffect {
+}
+ILightRgbw <|-- ILightRgbwEffect
+ILightEffect <|-- ILightRgbwEffect
+@enduml

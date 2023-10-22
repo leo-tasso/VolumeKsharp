@@ -1,0 +1,168 @@
+@startuml
+class Controller {
+    + Controller()
+    + Continue : bool <<get>> <<set>>
+    + AddInputCommand(command:InputCommands) : void
+}
+Controller --> "LightRgbwEffect" ILightRgbwEffect
+Controller --> "Communicator" ICommunicator
+class TrayIconMenu {
+    + ContextMenuThread(masterController:Controller) : void
+}
+class Launcher <<static>> {
+    + {static} Main() : void
+}
+enum InputCommands {
+    Plus,
+    Minus,
+    Press,
+    Release,
+}
+class Volume {
+    + Muted : bool <<get>> <<set>>
+    + GetVolume() : float
+    + SetVolume(desiredVolume:float) : void
+}
+class SolidAppearanceCommand {
+    + SolidAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- SolidAppearanceCommand
+class PercentageAppearanceCommand {
+    + PercentageAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int, percentage:float)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- PercentageAppearanceCommand
+class BreathAppearanceCommand {
+    + BreathAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int, speed:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- BreathAppearanceCommand
+class ChaseAppearanceCommand {
+    + ChaseAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int, speed:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- ChaseAppearanceCommand
+class RainbowAppearanceCommand {
+    + RainbowAppearanceCommand(brightness:int, speed:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- RainbowAppearanceCommand
+class FlashAppearanceCommand {
+    + FlashAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int, speed:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- FlashAppearanceCommand
+interface IAppearanceCommand {
+    Message : string? <<get>>
+}
+interface ILight {
+    MaxValue : int <<get>>
+    Brightness : int <<get>> <<set>>
+    State : bool <<get>> <<set>>
+    UpdateLight() : void
+    UpdateLight(brightness:int) : void
+    Equals(other:LightRgbwEffect?) : bool
+    Equals(obj:object?) : bool
+    GetHashCode() : int
+}
+ICloneable <|-- ILight
+interface ILightEffect {
+    ActiveEffect : string? <<get>> <<set>>
+    EffectSpeed : int <<get>> <<set>>
+}
+class "ISet`1"<T> {
+}
+ILight <|-- ILightEffect
+ILightEffect --> "EffectsSet<string>" "ISet`1"
+interface ILightRgb {
+    R : int <<get>> <<set>>
+    G : int <<get>> <<set>>
+    B : int <<get>> <<set>>
+}
+ILight <|-- ILightRgb
+class LightRgbwEffect {
+    + LightRgbwEffect(controller:Controller)
+    + MaxValue : int <<get>> = 255
+    + ActiveEffect : string? <<get>> <<set>>
+    + EffectSpeed : int <<get>> <<set>>
+    + R : int <<get>> <<set>>
+    + G : int <<get>> <<set>>
+    + B : int <<get>> <<set>>
+    + W : int <<get>> <<set>>
+    + Brightness : int <<get>> <<set>>
+    + State : bool <<get>> <<set>>
+    + UpdateLight() : void
+    + UpdateLight(brightness:int) : void
+    + Equals(other:LightRgbwEffect?) : bool
+    + <<override>> Equals(obj:object?) : bool
+    + <<override>> GetHashCode() : int
+    + Clone() : object
+}
+class "IEquatable`1"<T> {
+}
+class "ISet`1"<T> {
+}
+ILightRgbwEffect <|-- LightRgbwEffect
+"IEquatable`1" "<LightRgbwEffect>" <|-- LightRgbwEffect
+LightRgbwEffect o-> "EffectsSet<string>" "ISet`1"
+class RgbwLightMqttClient {
+    + RgbwLightMqttClient(brokerIpAddress:string, brokerPort:int, clientId:string, baseTopic:string, lightRgbwEffect:ILightRgbwEffect)
+    + <<async>> UpdateState(selectedLightRgbwEffect:ILightRgbwEffect) : void
+}
+interface ILightRgbwEffect {
+}
+ILightRgbw <|-- ILightRgbwEffect
+ILightEffect <|-- ILightRgbwEffect
+interface ILightRgbw {
+    W : int <<get>> <<set>>
+}
+ILightRgb <|-- ILightRgbw
+interface ICommunicator {
+    Port : string <<get>> <<set>>
+    Running : bool <<get>> <<set>>
+    Start() : void
+    GetPorts() : string[]
+    AddCommand(command:IAppearanceCommand) : void
+    Stop() : bool
+}
+class SerialCom {
+    + SerialCom(controller:Controller)
+    + Port : string <<get>> <<set>>
+    + Running : bool <<get>> <<set>>
+    + Start() : void
+    + GetPorts() : string[]
+    + AddCommand(command:IAppearanceCommand) : void
+    + Stop() : bool
+}
+ICommunicator <|-- SerialCom
+class MqttLight {
+    + MqttLight(callingController:Controller)
+    + <<override>> IncomingCommands(command:InputCommands) : void
+    + <<override>> Compute() : Task
+}
+enum State {
+    LightState,
+    Other,
+}
+Mode <|-- MqttLight
+MqttLight --> "RgbwLightMqttClient" RgbwLightMqttClient
+MqttLight +-- State
+abstract class Mode {
+    + {abstract} IncomingCommands(command:InputCommands) : void
+    + {abstract} Compute() : Task
+    + StackMode(newMode:Mode) : void
+}
+class VolumeMode {
+    + VolumeMode(callingController:Controller)
+    + <<override>> IncomingCommands(command:InputCommands) : void
+    + <<override>> Compute() : Task
+}
+enum State {
+    Other,
+    MuteState,
+    VolumeState,
+}
+Mode <|-- VolumeMode
+VolumeMode +-- State
+@enduml

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="104px" preserveAspectRatio="none" style="width:355px;height:104px;" version="1.1" viewBox="0 0 355 104" width="355px" zoomAndPan="magnify"><defs><filter height="300%" id="f1pyz0k2j98r4q" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[6503e9964510e8b83256f8f5e7109bf1]
+class Mode--><rect fill="#FEFECE" filter="url(#f1pyz0k2j98r4q)" height="86.4141" id="Mode" style="stroke: #A80036; stroke-width: 1.5;" width="337" x="7" y="7"/><ellipse cx="154.25" cy="23" fill="#A9DCDF" rx="11" ry="11" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M154.3594,18.3438 L153.2031,23.4219 L155.5313,23.4219 L154.3594,18.3438 Z M152.875,16.1094 L155.8594,16.1094 L159.2188,28.5 L156.7656,28.5 L156,25.4375 L152.7188,25.4375 L151.9688,28.5 L149.5313,28.5 L152.875,16.1094 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="34" x="174.75" y="27.1543">Mode</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="8" x2="343" y1="39" y2="39"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="8" x2="343" y1="47" y2="47"/><ellipse cx="18" cy="58" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="311" x="27" y="61.2104">IncomingCommands(command:InputCommands) : void</text><ellipse cx="18" cy="70.8047" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="97" x="27" y="74.0151">Compute() : Task</text><ellipse cx="18" cy="83.6094" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="191" x="27" y="86.8198">StackMode(newMode:Mode) : void</text><!--MD5=[09d297e7ef0f12bd3c4ca712bbd9c6a3]
+@startuml
+abstract class Mode {
+    + {abstract} IncomingCommands(command:InputCommands) : void
+    + {abstract} Compute() : Task
+    + StackMode(newMode:Mode) : void
+}
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 GMT 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 11.0.9+11-Ubuntu-0ubuntu1
+Operating System: Linux
+Default Encoding: ANSI_X3.4-1968
+Language: en
+Country: US
+--></g></svg>

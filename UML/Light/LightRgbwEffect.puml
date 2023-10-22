@@ -1,0 +1,27 @@
+@startuml
+class LightRgbwEffect {
+    + LightRgbwEffect(controller:Controller)
+    + MaxValue : int <<get>> = 255
+    + ActiveEffect : string? <<get>> <<set>>
+    + EffectSpeed : int <<get>> <<set>>
+    + R : int <<get>> <<set>>
+    + G : int <<get>> <<set>>
+    + B : int <<get>> <<set>>
+    + W : int <<get>> <<set>>
+    + Brightness : int <<get>> <<set>>
+    + State : bool <<get>> <<set>>
+    + UpdateLight() : void
+    + UpdateLight(brightness:int) : void
+    + Equals(other:LightRgbwEffect?) : bool
+    + <<override>> Equals(obj:object?) : bool
+    + <<override>> GetHashCode() : int
+    + Clone() : object
+}
+class "IEquatable`1"<T> {
+}
+class "ISet`1"<T> {
+}
+ILightRgbwEffect <|-- LightRgbwEffect
+"IEquatable`1" "<LightRgbwEffect>" <|-- LightRgbwEffect
+LightRgbwEffect o-> "EffectsSet<string>" "ISet`1"
+@enduml

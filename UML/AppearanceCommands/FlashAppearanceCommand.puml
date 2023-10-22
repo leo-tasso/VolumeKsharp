@@ -1,0 +1,7 @@
+@startuml
+class FlashAppearanceCommand {
+    + FlashAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int, speed:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- FlashAppearanceCommand
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+class SolidAppearanceCommand {
+    + SolidAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- SolidAppearanceCommand
+@enduml
