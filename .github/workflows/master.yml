@@ -58,14 +58,10 @@ jobs:
 
       - name: Commit UML diagrams
         run: |
-          git diff --exit-code > /dev/null 2>&1  # Suppress output and capture exit code
-          DIFF_EXIT_CODE=$?
-          if [ $DIFF_EXIT_CODE -eq 1 ]; then
-            git add .
-            git commit -m "Generate UML (${{ github.workflow }})"
-            git push origin HEAD:master
-          else
-            echo "No changes to commit."
-          fi
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Add UML diagrams"
+          git push
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
