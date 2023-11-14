@@ -56,8 +56,12 @@ jobs:
         with:
           args: -v -tsvg ${{ steps.get_file_names.outputs.UML_FILES }}
 
-      - name: Update GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.UML_OUTPUT_PATH }}
+      - name: Commit UML diagrams
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Add UML diagrams"
+          git push
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
