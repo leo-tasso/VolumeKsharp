@@ -1,0 +1,14 @@
+@startuml
+class MqttLight {
+    + MqttLight(callingController:Controller)
+    + <<override>> IncomingCommands(command:InputCommands) : void
+    + <<override>> Compute() : Task
+}
+enum State {
+    LightState,
+    Other,
+}
+Mode <|-- MqttLight
+MqttLight --> "RgbwLightMqttClient" RgbwLightMqttClient
+MqttLight +-- State
+@enduml

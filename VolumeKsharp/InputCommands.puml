@@ -1,0 +1,8 @@
+@startuml
+enum InputCommands {
+    Plus,
+    Minus,
+    Press,
+    Release,
+}
+@enduml

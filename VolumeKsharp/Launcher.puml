@@ -1,0 +1,5 @@
+@startuml
+class Launcher <<static>> {
+    + {static} Main() : void
+}
+@enduml

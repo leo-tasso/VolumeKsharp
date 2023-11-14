@@ -1,0 +1,7 @@
+@startuml
+class BreathAppearanceCommand {
+    + BreathAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int, speed:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- BreathAppearanceCommand
+@enduml

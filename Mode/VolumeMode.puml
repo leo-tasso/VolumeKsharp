@@ -1,0 +1,14 @@
+@startuml
+class VolumeMode {
+    + VolumeMode(callingController:Controller)
+    + <<override>> IncomingCommands(command:InputCommands) : void
+    + <<override>> Compute() : Task
+}
+enum State {
+    Other,
+    MuteState,
+    VolumeState,
+}
+Mode <|-- VolumeMode
+VolumeMode +-- State
+@enduml

@@ -1,0 +1,7 @@
+@startuml
+abstract class Mode {
+    + {abstract} IncomingCommands(command:InputCommands) : void
+    + {abstract} Compute() : Task
+    + StackMode(newMode:Mode) : void
+}
+@enduml

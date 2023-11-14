@@ -1,0 +1,6 @@
+@startuml
+class RgbwLightMqttClient {
+    + RgbwLightMqttClient(brokerIpAddress:string, brokerPort:int, clientId:string, baseTopic:string, lightRgbwEffect:ILightRgbwEffect)
+    + <<async>> UpdateState(selectedLightRgbwEffect:ILightRgbwEffect) : void
+}
+@enduml

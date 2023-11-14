@@ -1,0 +1,7 @@
+@startuml
+class PercentageAppearanceCommand {
+    + PercentageAppearanceCommand(r:int, g:int, b:int, w:int, brightness:int, percentage:float)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- PercentageAppearanceCommand
+@enduml

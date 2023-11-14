@@ -1,0 +1,7 @@
+@startuml
+class RainbowAppearanceCommand {
+    + RainbowAppearanceCommand(brightness:int, speed:int)
+    + Message : string? <<get>>
+}
+IAppearanceCommand <|-- RainbowAppearanceCommand
+@enduml

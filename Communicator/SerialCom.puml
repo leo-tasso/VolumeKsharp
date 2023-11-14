@@ -1,0 +1,12 @@
+@startuml
+class SerialCom {
+    + SerialCom(controller:Controller)
+    + Port : string <<get>> <<set>>
+    + Running : bool <<get>> <<set>>
+    + Start() : void
+    + GetPorts() : string[]
+    + AddCommand(command:IAppearanceCommand) : void
+    + Stop() : bool
+}
+ICommunicator <|-- SerialCom
+@enduml

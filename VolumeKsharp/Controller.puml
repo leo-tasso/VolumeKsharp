@@ -1,0 +1,9 @@
+@startuml
+class Controller {
+    + Controller()
+    + AddInputCommand(command:InputCommands) : void
+    + Stop() : void
+}
+Controller --> "LightRgbwEffect" ILightRgbwEffect
+Controller --> "Communicator" ICommunicator
+@enduml

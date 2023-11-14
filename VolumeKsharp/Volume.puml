@@ -1,0 +1,7 @@
+@startuml
+class Volume {
+    + Muted : bool <<get>> <<set>>
+    + GetVolume() : float
+    + SetVolume(desiredVolume:float) : void
+}
+@enduml

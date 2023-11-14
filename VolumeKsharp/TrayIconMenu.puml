@@ -1,0 +1,6 @@
+@startuml
+class TrayIconMenu {
+    + ContextMenuThread(masterController:Controller) : void
+    + Stop() : void
+}
+@enduml

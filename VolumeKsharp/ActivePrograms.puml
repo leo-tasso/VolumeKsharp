@@ -1,0 +1,7 @@
+@startuml
+class ActivePrograms {
+    + ActiveApps : string[]? <<get>>
+    + {static} GetInstance() : ActivePrograms
+    + Stop() : void
+}
+@enduml
