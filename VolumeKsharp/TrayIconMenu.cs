@@ -107,6 +107,15 @@ namespace VolumeKsharp
             contextMenuThread.Start();
         }
 
+        /// <summary>
+        /// Method to close the tray icon.
+        /// </summary>
+        public void Stop()
+        {
+            this.notifyIcon!.Visible = false;
+            Application.Exit();
+        }
+
         private void ComPortComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selectedPort = this.comPortComboBox.SelectedItem.ToString() ?? string.Empty;
@@ -133,10 +142,7 @@ namespace VolumeKsharp
 
         private void ExitMenuItem_Click(object sender, EventArgs e)
         {
-            this.Controller!.Communicator.Stop();
-            this.Controller.Continue = false;
-            this.notifyIcon!.Visible = false;
-            Application.Exit();
+            this.Controller?.Stop();
         }
 
         private void OnPowerModeChanged(object sender, Microsoft.Win32.PowerModeChangedEventArgs e)

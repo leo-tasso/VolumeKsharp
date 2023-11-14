@@ -17,8 +17,6 @@ public static class Launcher
     [STAThread]
     public static void Main()
  {
-     TrayIconMenu program = new TrayIconMenu();
-     var controller = new Controller();
-     program.ContextMenuThread(controller);
+     var unused = new Controller();
  }
 }

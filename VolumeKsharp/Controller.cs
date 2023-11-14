@@ -4,7 +4,9 @@
 
 namespace VolumeKsharp;
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using VolumeKsharp.Communicator;
 using VolumeKsharp.Light;
@@ -16,17 +18,22 @@ using VolumeKsharp.Mode;
 public class Controller
 {
     private static readonly Queue<InputCommands> InputCommandsQueue = new();
+    private readonly TrayIconMenu trayIcon;
+    private readonly Thread updater;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Controller"/> class.
     /// </summary>
     public Controller()
     {
-        this.Continue = true;
+        this.Running = true;
         this.Communicator = new SerialCom(this);
         this.Communicator.Start();
         this.LightRgbwEffect = new LightRgbwEffect(this);
-        new Thread(this.Update).Start();
+        this.trayIcon = new TrayIconMenu();
+        this.trayIcon.ContextMenuThread(this);
+        this.updater = new Thread(this.Update);
+        this.updater.Start();
     }
 
     /// <summary>
@@ -42,7 +49,7 @@ public class Controller
     /// <summary>
     /// Gets or sets a value indicating whether the state of the controller thread.
     /// </summary>
-    public bool Continue { get; set; }
+    private bool Running { get; set; }
 
     private Mode.Mode? LastMode { get; set; }
 
@@ -55,6 +62,18 @@ public class Controller
         InputCommandsQueue.Enqueue(command);
     }
 
+    /// <summary>
+    /// Method to stop all the threads of the controller and close the tray icon.
+    /// </summary>
+    public void Stop()
+    {
+        this.Running = false;
+        this.Communicator.Stop();
+        ActivePrograms.GetInstance().Stop();
+        this.trayIcon.Stop();
+        this.updater.Join();
+    }
+
     private void AddMode(Mode.Mode newMode)
     {
         this.LastMode?.StackMode(newMode);
@@ -65,8 +84,14 @@ public class Controller
     {
         this.AddMode(new MqttLight(this));
         this.AddMode(new VolumeMode(this));
-        while (this.Continue)
+        while (this.Running)
         {
+            // Mockup to show the conditional add of new modes. (do also removal)
+            if ((ActivePrograms.GetInstance().ActiveApps ?? Array.Empty<string>()).Contains("light"))
+            {
+                this.AddMode(new MqttLight(this));
+            }
+
             if (InputCommandsQueue.Count > 0)
             {
                 this.LastMode?.IncomingCommands(InputCommandsQueue.Dequeue());
