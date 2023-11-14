@@ -58,8 +58,6 @@ jobs:
 
       - name: Commit UML diagrams
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
           git diff --exit-code > /dev/null 2>&1  # Suppress output and capture exit code
           DIFF_EXIT_CODE=$?
           if [ $DIFF_EXIT_CODE -eq 1 ]; then
