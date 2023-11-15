@@ -118,7 +118,7 @@ namespace VolumeKsharp
 
         private void ComPortComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string selectedPort = this.comPortComboBox.SelectedItem.ToString() ?? string.Empty;
+            var selectedPort = this.comPortComboBox.SelectedItem?.ToString() ?? string.Empty;
             var controller = this.Controller;
             if (controller is not null)
             {
