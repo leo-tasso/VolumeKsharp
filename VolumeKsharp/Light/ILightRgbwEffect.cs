@@ -7,6 +7,4 @@ namespace VolumeKsharp.Light;
 /// <summary>
 /// Interface for a RGBW light with effects.
 /// </summary>
-public interface ILightRgbwEffect : ILightRgbw, ILightEffect
-{
-}
+public interface ILightRgbwEffect : ILightRgbw, ILightEffect;
