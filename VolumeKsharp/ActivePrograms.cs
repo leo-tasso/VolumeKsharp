@@ -13,8 +13,8 @@ using System.Threading;
 /// </summary>
 public class ActivePrograms
 {
-    private static readonly object Lock = new object();
-    private static ActivePrograms? instance;
+    private static readonly Lock Lock = new Lock();
+    private static ActivePrograms? _instance;
     private readonly Thread checker;
     private bool running = true;
 
@@ -45,17 +45,17 @@ public class ActivePrograms
     /// <returns>The instance of the singleton.</returns>
     public static ActivePrograms GetInstance()
         {
-            if (instance != null)
+            if (_instance != null)
             {
-                return instance;
+                return _instance;
             }
 
             lock (Lock)
             {
-                instance ??= new ActivePrograms();
+                _instance ??= new ActivePrograms();
             }
 
-            return instance;
+            return _instance;
         }
 
     /// <summary>

@@ -6,7 +6,7 @@ namespace VolumeKsharp.Light;
 
 using System;
 using System.Collections.Generic;
-using VolumeKsharp.AppearanceCommands;
+using AppearanceCommands;
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 

@@ -7,7 +7,7 @@ namespace VolumeKsharp.Mode;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using VolumeKsharp.AppearanceCommands;
+using AppearanceCommands;
 
 /// <summary/> mode to show volume status on the ring.
 public class VolumeMode : Mode

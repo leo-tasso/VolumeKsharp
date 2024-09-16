@@ -4,7 +4,7 @@
 
 namespace VolumeKsharp.Communicator;
 
-using VolumeKsharp.AppearanceCommands;
+using AppearanceCommands;
 
 /// <summary>
 /// Interface of a Communicator, the api to exchange commands with the device.

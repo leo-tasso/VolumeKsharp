@@ -8,9 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using VolumeKsharp.Communicator;
-using VolumeKsharp.Light;
-using VolumeKsharp.Mode;
+using Communicator;
+using Light;
+using Mode;
 
 /// <summary>
 /// The controller class.

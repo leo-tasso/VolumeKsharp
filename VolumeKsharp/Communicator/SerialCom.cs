@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Threading;
-using VolumeKsharp.AppearanceCommands;
+using AppearanceCommands;
 
 /// <summary>
 /// Class to dialog serially with the knob.

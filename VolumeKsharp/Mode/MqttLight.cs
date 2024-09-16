@@ -5,7 +5,7 @@
 namespace VolumeKsharp.Mode;
 
 using System.Threading.Tasks;
-using VolumeKsharp.Light;
+using Light;
 
 /// <summary>
 /// The mode handling a light with mqtt.
