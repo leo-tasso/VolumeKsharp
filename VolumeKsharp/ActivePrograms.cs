@@ -14,9 +14,7 @@ using System.Threading;
 public class ActivePrograms
 {
     private static readonly Lock Lock = new Lock();
-#pragma warning disable SA1309
     private static ActivePrograms? _instance;
-#pragma warning restore SA1309
     private readonly Thread checker;
     private bool running = true;
 

@@ -6,9 +6,7 @@ namespace VolumeKsharp.Light;
 
 using System;
 using System.Collections.Generic;
-#pragma warning disable SA1135
 using AppearanceCommands;
-#pragma warning restore SA1135
 
 // ReSharper disable NonReadonlyMemberInGetHashCode
 

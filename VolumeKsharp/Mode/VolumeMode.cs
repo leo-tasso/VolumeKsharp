@@ -7,9 +7,7 @@ namespace VolumeKsharp.Mode;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-#pragma warning disable SA1135
 using AppearanceCommands;
-#pragma warning restore SA1135
 
 /// <summary/> mode to show volume status on the ring.
 public class VolumeMode : Mode
@@ -148,7 +146,7 @@ public class VolumeMode : Mode
         }
 
 // Section to update the light.
-        // If The active state is the same as the target state, update it's properties.
+        // If The active state is the same as the target state, update its properties.
         if (this.targetState == this.activeState)
         {
             // If the final brightness is reached.
