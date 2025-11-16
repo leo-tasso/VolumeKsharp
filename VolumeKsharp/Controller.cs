@@ -6,11 +6,12 @@ namespace VolumeKsharp;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
+#pragma warning disable SA1135
 using Communicator;
 using Light;
 using Mode;
+#pragma warning restore SA1135
 
 /// <summary>
 /// The controller class.

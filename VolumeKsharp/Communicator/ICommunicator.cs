@@ -4,7 +4,8 @@
 
 namespace VolumeKsharp.Communicator;
 
-using AppearanceCommands;
+// ReSharper disable once RedundantNameQualifier
+using VolumeKsharp.AppearanceCommands;
 
 /// <summary>
 /// Interface of a Communicator, the api to exchange commands with the device.

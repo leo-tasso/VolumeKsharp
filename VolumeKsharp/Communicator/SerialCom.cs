@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Threading;
+#pragma warning disable SA1135
 using AppearanceCommands;
+#pragma warning restore SA1135
 
 /// <summary>
 /// Class to dialog serially with the knob.

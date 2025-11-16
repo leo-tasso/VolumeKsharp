@@ -5,7 +5,9 @@
 namespace VolumeKsharp.Mode;
 
 using System.Threading.Tasks;
+#pragma warning disable SA1135
 using Light;
+#pragma warning restore SA1135
 
 /// <summary>
 /// The mode handling a light with mqtt.

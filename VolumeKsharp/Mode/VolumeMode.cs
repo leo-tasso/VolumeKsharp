@@ -7,7 +7,9 @@ namespace VolumeKsharp.Mode;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+#pragma warning disable SA1135
 using AppearanceCommands;
+#pragma warning restore SA1135
 
 /// <summary/> mode to show volume status on the ring.
 public class VolumeMode : Mode

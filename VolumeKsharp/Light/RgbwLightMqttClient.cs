@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
-using MQTTnet.Client;
 using MQTTnet.Extensions.ManagedClient;
 using Newtonsoft.Json.Linq;
 
@@ -43,10 +42,11 @@ public class RgbwLightMqttClient
         this.lightRgbwEffect = lightRgbwEffect;
         var options = new ManagedMqttClientOptionsBuilder()
             .WithAutoReconnectDelay(TimeSpan.FromSeconds(5))
-            .WithClientOptions(new MqttClientOptionsBuilder()
-                .WithTcpServer(brokerIpAddress, brokerPort)
-                .WithClientId(clientId)
-                .Build())
+            .WithClientOptions(o =>
+            {
+                o.WithTcpServer(brokerIpAddress, brokerPort);
+                o.WithClientId(clientId);
+            })
             .Build();
 
         this.mqttClient = new MqttFactory().CreateManagedMqttClient();

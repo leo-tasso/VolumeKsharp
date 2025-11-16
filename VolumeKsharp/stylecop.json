@@ -11,6 +11,9 @@
     "rules": {
         "SA1309": {
             "enabled": false
+        },        
+        "SA1135": {
+            "enabled": false
         }
     }
 }
